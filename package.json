@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.86",
@@ -25,7 +25,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "autoprefixer": "^10.4.20",
-    "eslint": "^9.39.5",
+    "eslint": "^8.57.1",
     "eslint-config-next": "^16.3.8",
     "postcss": "^8.4.41",
     "prisma": "^5.20.0",

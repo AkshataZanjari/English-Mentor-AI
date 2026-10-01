@@ -1,0 +1,16 @@
+import { clerkMiddleware } from "@clerk/nextjs/server";
+
+export default clerkMiddleware((auth, req) => {}, {
+  // Allow a standard 5-minute clock skew to prevent false session rejections 
+  // if the local system time is slightly out of sync with Clerk's servers.
+  clockSkewInMs: 5 * 60 * 1000,
+});
+
+export const config = {
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
+};

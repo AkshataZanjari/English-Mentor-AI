@@ -1,10 +1,23 @@
 "use client";
-import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
+import { useAuth, useClerk, RedirectToSignIn } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
 export default function SafeRedirect() {
   const { isLoaded, userId } = useAuth();
+  const { signOut } = useClerk();
+  const [isSignOutForced, setIsSignOutForced] = useState(false);
   
-  if (isLoaded && !userId) {
+  useEffect(() => {
+    if (isLoaded && userId) {
+      // Split-brain: Client is authenticated but Server rejected the session.
+      // Force a sign out to clear the stale/invalid client state.
+      signOut().then(() => {
+        setIsSignOutForced(true);
+      });
+    }
+  }, [isLoaded, userId, signOut]);
+  
+  if ((isLoaded && !userId) || isSignOutForced) {
     return <RedirectToSignIn />;
   }
   
