@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Generate Prisma Client
+      run: npx prisma generate
+      
+    - name: Run Build
+      run: npm run build
+      env:
+        # We supply dummy values for CI so the build doesn't fail on missing env vars
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX
+        CLERK_SECRET_KEY: sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX
+        DATABASE_URL: postgresql://postgres:password@localhost:5432/db
+        GEMINI_API_KEY: dummy_key
