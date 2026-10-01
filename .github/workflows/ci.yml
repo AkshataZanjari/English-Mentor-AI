@@ -25,11 +25,14 @@ jobs:
     - name: Generate Prisma Client
       run: npx prisma generate
       
+    - name: Run Lint
+      run: npm run lint
+      
     - name: Run Build
       run: npm run build
       env:
         # We supply dummy values for CI so the build doesn't fail on missing env vars
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuYXBwLmRldiQ
         CLERK_SECRET_KEY: sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX
         DATABASE_URL: postgresql://postgres:password@localhost:5432/db
         GEMINI_API_KEY: dummy_key
