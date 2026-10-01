@@ -1,0 +1,97 @@
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { RedirectToSignIn } from "@clerk/nextjs";
+import { prisma } from "@/lib/prisma";
+import ProgressChart from "@/components/ProgressChart";
+
+export default async function DashboardPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return <RedirectToSignIn />
+  }
+
+  let dbUser = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    include: {
+      history: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!dbUser) {
+    const user = await currentUser();
+    if (user) {
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId: userId,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          email: user.emailAddresses[0]?.emailAddress || "",
+        },
+        include: { history: true },
+      });
+    } else {
+      return <div>Error loading user profile.</div>;
+    }
+  }
+
+  const totalChecks = dbUser.history.length;
+  const correctedCount = dbUser.history.filter(
+    (item) => item.originalText !== item.correctedText
+  ).length;
+  const correctCount = totalChecks - correctedCount;
+  const recentHistory = dbUser.history.slice(0, 10);
+
+  const chartMap: Record<string, number> = {};
+
+  dbUser.history.forEach((item) => {
+    const date = new Date(item.createdAt).toLocaleDateString("en-CA");
+    chartMap[date] = (chartMap[date] || 0) + 1;
+  });
+
+  const chartData = Object.entries(chartMap).map(([date, checks]) => ({
+    date,
+    checks,
+  }));
+
+  return (
+    <main className="p-8 space-y-6">
+      <h1 className="text-3xl font-bold">Your Learning Dashboard</h1>
+
+      <div className="grid md:grid-cols-3 gap-4">
+        <div className="glass-card p-5">
+          <p className="text-sm text-white/70">Total Checks</p>
+          <h2 className="text-3xl font-bold">{totalChecks}</h2>
+        </div>
+
+        <div className="glass-card p-5">
+          <p className="text-sm text-white/70">Incorrect Sentences</p>
+          <h2 className="text-3xl font-bold">{correctedCount}</h2>
+        </div>
+
+        <div className="glass-card p-5">
+          <p className="text-sm text-white/70">Already Correct</p>
+          <h2 className="text-3xl font-bold">{correctCount}</h2>
+        </div>
+      </div>
+
+      <ProgressChart data={chartData} />
+
+      <div className="glass-card p-6">
+        <h2 className="text-xl font-semibold mb-4">Recent Checks</h2>
+        <div className="space-y-4">
+          {recentHistory.length === 0 ? (
+            <p className="text-white/70">No grammar checks yet.</p>
+          ) : (
+            recentHistory.map((item) => (
+              <div key={item.id} className="border-b border-white/10 pb-3">
+                <p><strong>Original:</strong> {item.originalText}</p>
+                <p><strong>Corrected:</strong> {item.correctedText}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
