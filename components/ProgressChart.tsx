@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export default function ProgressChart({ data }: { data: any[] }) {
+export default function ProgressChart({ data }: { data: { name: string; score: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={data}>

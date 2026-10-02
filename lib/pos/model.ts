@@ -18,9 +18,11 @@ export async function generateStructured<T>({
   schema: z.ZodSchema<T>;
 }) {
   const result = await generateObject({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model: model as any,
     system,
     prompt,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     schema: schema as any,
   });
 
@@ -35,6 +37,7 @@ export async function generatePlainText({
   prompt: string;
 }) {
   const result = await generateText({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model: model as any,
     system,
     prompt,

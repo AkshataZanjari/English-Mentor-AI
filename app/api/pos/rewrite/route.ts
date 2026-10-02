@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import {
   rewriteBodySchema,
   scenarioReportSchema,
@@ -26,6 +27,11 @@ function looksLikeScenarioReportPrompt(text: string) {
 
 export async function POST(req: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return fail("Unauthorized", 401);
+    }
+
     const json = await req.json();
     const body = rewriteBodySchema.parse(json);
 

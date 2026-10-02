@@ -17,8 +17,6 @@ import {
   ScenarioReport,
   careerTools,
   scenarioConfigs,
-  writeEmojiSuggestions,
-  examEmojiSuggestions,
 } from "./config";
 import { SectionShell, Card, SubtleChip, ResultPanel } from "./ui";
 
@@ -158,10 +156,6 @@ export default function POSPage() {
       const nextCursor = before.length + insertedText.length;
       textarea.setSelectionRange(nextCursor, nextCursor);
     });
-  }
-
-  function addEmojiToSentence(emoji: string) {
-    insertTextAtCursor(sentence, emoji, sentenceRef.current, setSentence);
   }
 
   function addEmojiToScenario(emoji: string) {
@@ -354,7 +348,7 @@ ${text}`;
         setSpeechStatus("Listening...");
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let transcript = "";
         for (let i = 0; i < event.results.length; i += 1) {
           transcript += event.results[i][0].transcript;

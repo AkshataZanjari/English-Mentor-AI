@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 
 export default function GrammarChecker() {
   const [sentence, setSentence] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,7 @@ export default function GrammarChecker() {
       } else {
         setResult(data);
       }
-    } catch (err) {
+    } catch {
       setResult({
         isCorrect: false,
         correctedSentence: sentence,

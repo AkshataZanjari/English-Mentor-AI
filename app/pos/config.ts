@@ -32,7 +32,7 @@ export type SpeechRecognitionCtor = new () => {
   onstart: null | (() => void);
   onend: null | (() => void);
   onerror: null | ((event: { error?: string }) => void);
-  onresult: null | ((event: any) => void);
+  onresult: null | ((event: SpeechRecognitionEvent) => void);
 };
 
 declare global {

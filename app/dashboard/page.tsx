@@ -159,14 +159,14 @@ async function DashboardContent() {
               <div className="flex items-center space-x-4 shrink-0">
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    ((h as any).score || 0) >= 80
+                    (h.score || 0) >= 80
                       ? "bg-emerald-500/20 text-emerald-400"
-                      : ((h as any).score || 0) >= 60
+                      : (h.score || 0) >= 60
                       ? "bg-yellow-500/20 text-yellow-400"
                       : "bg-red-500/20 text-red-400"
                   }`}
                 >
-                  Score: {(h as any).score || 0}
+                  Score: {h.score || 0}
                 </span>
               </div>
             </div>
