@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 export const rewriteBodySchema = z.object({
-  text: z.string().min(1, "Text is required"),
+  text: z.string().min(1, "Text is required").max(1000, "Text is too long"),
   tone: z.enum(["genz", "formal"]).optional(),
 });
 
 export const checkBodySchema = z.object({
-  text: z.string().min(1, "Text is required"),
+  text: z.string().min(1, "Text is required").max(1000, "Text is too long"),
 });
 
 export const replyBodySchema = z.object({
-  message: z.string().min(1, "Message is required"),
-  draftReply: z.string().optional().default(""),
+  message: z.string().min(1, "Message is required").max(1000, "Message is too long"),
+  draftReply: z.string().max(1000, "Draft reply is too long").optional().default(""),
 });
 
 export const scenarioTurnSchema = z.object({

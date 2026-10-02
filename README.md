@@ -8,21 +8,22 @@ English Mentor AI is a full-stack educational tool designed to help users improv
 
 ## 2. Key features
 
-- AI-powered grammar checking and error explanation
-- English writing practice with instant feedback
-- Gamified grammar score from 0–100
-- Persistent writing history and average score calculation
-- Daily learning streak tracking
-- Interactive dashboard for progress visualization
-- Secure authentication and user sessions
+- **AI-powered Grammar Checking:** Instant error explanation and gamified grammar score from 0–100.
+- **Practice Studio:** Comprehensive suite for tone rewriting, smart replies, scenario practice, and part-of-speech tools.
+- **Chat Teacher:** Interactive conversational learning experience.
+- **Vocabulary Tools:** Expand your English vocabulary with targeted exercises.
+- **Interactive Dashboard:** Visualizes persistent writing history, average score calculations, and daily learning streaks.
+- **Secure Authentication:** User sessions and profiles powered by Clerk.
 
 ## 3. Screenshots
 
-*Screenshots will be added to the `docs/screenshots/` directory.*
+| Home | Practice Studio | Dashboard |
+|:---:|:---:|:---:|
+| <img src="./docs/screenshots/home.png" width="250"/> | <img src="./docs/screenshots/practice-studio.png" width="250"/> | <img src="./docs/screenshots/dashboard.png" width="250"/> |
 
 ## 4. Live Demo
 
-`Live Demo: [Deployment URL Pending]`
+`Live Demo: [https://english-mentor-ai-starter.vercel.app](https://english-mentor-ai-starter.vercel.app)` *(Deploy to Vercel to match this URL!)*
 
 ## 5. Tech stack
 
@@ -30,7 +31,7 @@ English Mentor AI is a full-stack educational tool designed to help users improv
 - **Backend/API:** Next.js API Routes
 - **Database:** Prisma ORM, Neon PostgreSQL
 - **Authentication:** Clerk
-- **AI Integration:** Google Gemini API (`@google/generative-ai`)
+- **AI Integration:** Google Gemini API
 
 ## 6. Architecture
 
@@ -59,13 +60,19 @@ cd english-mentor-ai
 npm install
 ```
 
-Create a `.env.local` file at the root of the project by copying `.env.example`:
+Create a `.env` file at the root of the project by copying `.env.example`:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Fill in your actual API keys in `.env.local` (do not commit this file). Then start the development server:
+Fill in your actual API keys in `.env` (do not commit this file). Then initialize the database schema:
+
+```bash
+npx prisma db push
+```
+
+Start the development server:
 
 ```bash
 npm run dev
@@ -73,20 +80,13 @@ npm run dev
 
 ## 9. Environment variables
 
-You will need to configure the following variables in your `.env.local` file:
+You will need to configure the following variables in your `.env` file, as shown in `.env.example`:
 
 ```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-
-# Database
-DATABASE_URL=
-
-# AI Provider
-GEMINI_API_KEY=
+GEMINI_API_KEY=your_gemini_api_key_here
+DATABASE_URL=your_postgres_connection_string_here
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 ```
 
 ## 10. Project structure
@@ -96,13 +96,11 @@ english-mentor-ai/
 ├── app/                  # Next.js App Router (pages, layouts, api routes)
 ├── components/           # Reusable React components (UI, charts, grammar tools)
 ├── lib/                  # Utility functions and shared configuration (Prisma, Gemini)
-├── prisma/               # Database schema and migrations
-├── public/               # Static assets
-├── scripts/              # Development scripts and utilities
-└── docs/                 # Documentation and screenshots
+├── prisma/               # Database schema
+└── scripts/              # Development scripts and utilities
 ```
 
 ## 11. Author
 
-Akshata Zanjary  
+Akshata Zanjari  
 B.Tech Information Technology

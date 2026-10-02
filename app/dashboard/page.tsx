@@ -39,11 +39,6 @@ async function DashboardContent() {
 
   let dbUser = await prisma.user.findUnique({
     where: { clerkId: userId },
-    include: {
-      history: {
-        orderBy: { createdAt: "desc" },
-      },
-    },
   });
 
   if (!dbUser) {
@@ -55,7 +50,6 @@ async function DashboardContent() {
           name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
           email: user.emailAddresses[0]?.emailAddress || "",
         },
-        include: { history: true },
       });
     } else {
       return (
@@ -68,15 +62,28 @@ async function DashboardContent() {
     }
   }
 
-  const totalChecks = dbUser.history.length;
-  const recentHistory = dbUser.history.slice(0, 5);
+  const [totalChecks, avgResult, historyRecords] = await Promise.all([
+    prisma.grammarCheckHistory.count({ where: { userId: dbUser.id } }),
+    prisma.grammarCheckHistory.aggregate({
+      where: { userId: dbUser.id },
+      _avg: { score: true },
+    }),
+    prisma.grammarCheckHistory.findMany({
+      where: { userId: dbUser.id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+  ]);
 
-  const chartData = dbUser.history
+  const avgScore = avgResult._avg.score ? Math.round(avgResult._avg.score) : 0;
+  const recentHistory = historyRecords.slice(0, 5);
+
+  const chartData = historyRecords
     .slice()
     .reverse()
     .map((h, i) => ({
       name: `Check ${i + 1}`,
-      score: (h as any).score || 0,
+      score: h.score || 0,
     }));
 
   return (
@@ -125,12 +132,7 @@ async function DashboardContent() {
               <div className="bg-black/20 p-4 rounded-xl text-center">
                 <p className="text-white/60 text-xs uppercase tracking-wider mb-1">Avg Score</p>
                 <p className="text-2xl font-bold text-emerald-400">
-                  {totalChecks > 0
-                    ? Math.round(
-                        dbUser.history.reduce((a, b) => a + (Number((b as any).score) || 0), 0) /
-                          totalChecks
-                      )
-                    : 0}
+                  {avgScore}
                 </p>
               </div>
             </div>

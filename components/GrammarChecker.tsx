@@ -10,14 +10,35 @@ export default function GrammarChecker() {
   async function checkGrammar() {
     if (!sentence.trim()) return;
     setLoading(true);
-    const res = await fetch("/api/grammar-check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sentence }),
-    });
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/grammar-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setResult({
+          isCorrect: false,
+          correctedSentence: sentence,
+          explanation: data.error || "An error occurred while checking grammar.",
+          mistakes: [],
+        });
+      } else {
+        setResult(data);
+      }
+    } catch (err) {
+      setResult({
+        isCorrect: false,
+        correctedSentence: sentence,
+        explanation: "Network error. Please try again.",
+        mistakes: [],
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

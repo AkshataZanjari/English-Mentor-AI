@@ -2,85 +2,59 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { z } from "zod";
 
+const sentenceSchema = z.string().min(1).max(1000);
+
+// Basic in-memory rate limiter
+const rateLimitCache = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 20; // max requests per minute
+const WINDOW_MS = 60 * 1000;
 function fallbackGrammar(sentence: string) {
-  const original = sentence.trim();
-  const lower = original.toLowerCase();
-
-  if (lower === "she don't like apples." || lower === "she don't like apples") {
-    return {
-      isCorrect: false,
-      correctedSentence: "She doesn't like apples.",
-      mistakes: [
-        "Use 'doesn't' with she.",
-        "Use the base verb 'like' after doesn't.",
-      ],
-      explanation:
-        "For she, he, and it, use 'doesn't' in the present simple negative form. After doesn't, use the base verb, such as 'like'.",
-      rule: "She/He/It + doesn't + base verb",
-      difficulty: "Beginner",
-      similarExamples: [
-        "He doesn't play the piano.",
-        "It doesn't often snow in this city.",
-        "My dog doesn't bark at strangers.",
-      ],
-      practiceQuestion: "He _____ speak French.",
-      practiceAnswer: "doesn't",
-      score: 30,
-      scoreExplanation: "Major grammatical errors with subject-verb agreement.",
-    };
-  }
-
-  if (lower === "i want go college." || lower === "i want go college") {
-    return {
-      isCorrect: false,
-      correctedSentence: "I want to go to college.",
-      mistakes: [
-        "Missing 'to' after want.",
-        "Missing 'to' before college.",
-      ],
-      explanation:
-        "After 'want', we usually use 'to' plus a verb. We also say 'go to' before places like school or college.",
-      rule: "Want + to + verb; Go + to + place",
-      difficulty: "Beginner",
-      similarExamples: [
-        "I want to learn English.",
-        "She wants to play football.",
-        "They want to travel.",
-      ],
-      practiceQuestion: "I want ___ buy a laptop.",
-      practiceAnswer: "to",
-      score: 60,
-      scoreExplanation: "Missing prepositions 'to', but overall meaning is clear.",
-    };
-  }
-
+  // A safe default fallback if the AI response cannot be parsed
   return {
     isCorrect: false,
-    correctedSentence: "",
-    mistakes: [],
-    explanation: "No explanation returned.",
-    rule: "",
-    difficulty: "Beginner",
+    correctedSentence: sentence,
+    mistakes: ["Unable to analyze grammar at the moment. Please try again later."],
+    explanation: "Our AI service encountered an error and could not analyze this sentence.",
+    rule: "System Error",
+    difficulty: "Unknown",
     similarExamples: [],
     practiceQuestion: "",
     practiceAnswer: "",
     score: 0,
-    scoreExplanation: "No score generated.",
+    scoreExplanation: "No score generated due to an AI error.",
   };
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const sentence = String(body?.sentence || "").trim();
-    const { userId } = await auth();
-
-    if (!sentence) {
+    let sentence = "";
+    try {
+      sentence = sentenceSchema.parse(String(body?.sentence || "").trim());
+    } catch (e) {
       return NextResponse.json(
-        { error: "Sentence is required" },
+        { error: "Sentence must be between 1 and 1000 characters" },
         { status: 400 }
       );
+    }
+
+    const { userId } = await auth();
+
+    // Rate Limiting
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown-ip";
+    const nowTime = Date.now();
+    let limiter = rateLimitCache.get(ip);
+    if (!limiter || limiter.resetAt < nowTime) {
+      limiter = { count: 1, resetAt: nowTime + WINDOW_MS };
+    } else {
+      limiter.count++;
+    }
+    rateLimitCache.set(ip, limiter);
+
+    if (limiter.count > RATE_LIMIT) {
+      return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
     }
 
     if (!process.env.GEMINI_API_KEY) {
@@ -114,8 +88,10 @@ export async function POST(req: NextRequest) {
     const prompt = `
 You are English Mentor AI, a strict and accurate English grammar teacher for beginners.
 
-Analyze this sentence:
-"${sentence}"
+Analyze this text wrapped in <text></text> tags:
+<text>
+${sentence}
+</text>
 
 Return only valid JSON with these exact keys:
 {
@@ -154,7 +130,6 @@ Output:
   "explanation": "For she, he, and it, use 'doesn't' in the present simple negative form. After doesn't, use the base verb.",
   "rule": "She/He/It + doesn't + base verb",
   "difficulty": "Beginner",
-  "similarExamples": ["He doesn't play the piano.", "It doesn't often snow in this city.", "My dog doesn't bark at strangers."],
   "similarExamples": ["He doesn't play the piano.", "It doesn't often snow in this city.", "My dog doesn't bark at strangers."],
   "practiceQuestion": "He _____ speak French.",
   "practiceAnswer": "doesn't",
@@ -224,9 +199,9 @@ Output:
         if (!lastPractice) {
           newStreak = 1;
         } else {
-          // Compare dates (local time representation, offset handled simply)
-          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          const lastDate = new Date(lastPractice.getFullYear(), lastPractice.getMonth(), lastPractice.getDate());
+          // Compare dates using UTC to prevent time zone drift issues for users
+          const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+          const lastDate = new Date(Date.UTC(lastPractice.getUTCFullYear(), lastPractice.getUTCMonth(), lastPractice.getUTCDate()));
           const diffDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
           
           if (diffDays === 1) {

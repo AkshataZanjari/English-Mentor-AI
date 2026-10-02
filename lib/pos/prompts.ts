@@ -14,8 +14,10 @@ Rules:
 - Do not include markdown fences.
 - Do not add any extra text outside JSON.
 
-User text:
-${text}`;
+User text wrapped in <text></text> tags:
+<text>
+${text}
+</text>`;
 }
 
 export function buildRewritePrompt(text: string, tone?: "genz" | "formal") {
@@ -32,8 +34,10 @@ Rules:
 - Output ONLY the final rewritten text.
 - Do not explain anything.
 
-User text:
-${text}`;
+User text wrapped in <text></text> tags:
+<text>
+${text}
+</text>`;
   }
 
   return `You are a professional English writing assistant.
@@ -47,8 +51,10 @@ Rules:
 - Output ONLY the final rewritten text.
 - Do not explain anything.
 
-User text:
-${text}`;
+User text wrapped in <text></text> tags:
+<text>
+${text}
+</text>`;
 }
 
 export function buildReplyPrompt(message: string, draftReply?: string) {
@@ -67,9 +73,13 @@ Rules:
 - Do not include markdown fences.
 - Do not add extra text outside JSON.
 
-Incoming message:
+Incoming message wrapped in <message></message> tags:
+<message>
 ${message}
+</message>
 
-Draft reply:
-${draftReply || ""}`;
+Draft reply wrapped in <draft></draft> tags:
+<draft>
+${draftReply || ""}
+</draft>`;
 }

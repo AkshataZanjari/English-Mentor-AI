@@ -12,19 +12,20 @@ export async function POST() {
 
   const email = user.emailAddresses[0]?.emailAddress || "";
 
-  const existingUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+  const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
 
-  if (!existingUser) {
-    await prisma.user.create({
-      data: {
-        clerkId: userId,
-        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-        email,
-      },
-    });
-  }
+  await prisma.user.upsert({
+    where: { clerkId: userId },
+    update: {
+      name,
+      email,
+    },
+    create: {
+      clerkId: userId,
+      name,
+      email,
+    },
+  });
 
   return NextResponse.json({ success: true });
 }

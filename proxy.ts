@@ -1,6 +1,15 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware((auth, req) => {}, {
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/api/dashboard(.*)"
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+}, {
   // Allow a standard 5-minute clock skew to prevent false session rejections 
   // if the local system time is slightly out of sync with Clerk's servers.
   clockSkewInMs: 5 * 60 * 1000,

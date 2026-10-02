@@ -17,8 +17,6 @@ model User {
   lastPracticeAt DateTime?
   createdAt      DateTime @default(now())
   history     GrammarCheckHistory[]
-  quizzes     QuizAttempt[]
-  bookmarks   Bookmark[]
 }
 
 model GrammarCheckHistory {
@@ -33,29 +31,4 @@ model GrammarCheckHistory {
   createdAt       DateTime @default(now())
 }
 
-model QuizAttempt {
-  id             String   @id @default(uuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id])
-  topic          String
-  difficulty     String
-  score          Int
-  totalQuestions Int
-  createdAt      DateTime @default(now())
-}
 
-model Bookmark {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  ruleTopic String
-  savedAt   DateTime @default(now())
-}
-
-model DailyChallenge {
-  id           String   @id @default(uuid())
-  date         DateTime @unique
-  wordOfDay    String
-  grammarRule  String
-  quizJson     Json
-}
