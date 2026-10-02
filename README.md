@@ -10,8 +10,6 @@ English Mentor AI is a full-stack educational tool designed to help users improv
 
 - **AI-powered Grammar Checking:** Instant error explanation and gamified grammar score from 0–100.
 - **Practice Studio:** Comprehensive suite for tone rewriting, smart replies, scenario practice, and part-of-speech tools.
-- **Chat Teacher:** Interactive conversational learning experience.
-- **Vocabulary Tools:** Expand your English vocabulary with targeted exercises.
 - **Interactive Dashboard:** Visualizes persistent writing history, average score calculations, and daily learning streaks.
 - **Secure Authentication:** User sessions and profiles powered by Clerk.
 
@@ -23,7 +21,15 @@ English Mentor AI is a full-stack educational tool designed to help users improv
 
 ## 4. Live Demo
 
-`Live Demo: [https://english-mentor-ai-starter.vercel.app](https://english-mentor-ai-starter.vercel.app)` *(Deploy to Vercel to match this URL!)*
+`Live Demo:` _(Deploy to Vercel and add your URL here)_
+
+### Vercel Deployment Notes
+To deploy this project:
+1. Push your repository to GitHub.
+2. Go to Vercel and import your repository.
+3. In the Vercel dashboard, navigate to your project settings -> Environment Variables.
+4. Add all variables from your `.env.example` (GEMINI_API_KEY, DATABASE_URL, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY).
+5. Trigger a new deployment.
 
 ## 5. Tech stack
 
