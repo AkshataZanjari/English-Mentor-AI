@@ -4,6 +4,7 @@ import { buildReplyPrompt } from "@/lib/pos/prompts";
 import { generateStructured } from "@/lib/pos/model";
 import { fail, ok } from "@/lib/pos/response";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { sanitizeUserText } from "@/lib/pos/sanitize";
 
 export async function POST(req: Request) {
   try {
@@ -12,16 +13,26 @@ export async function POST(req: Request) {
       return fail("Unauthorized", 401);
     }
 
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown-ip";
-    if (!checkRateLimit(ip)) {
-      return fail("Rate limit exceeded", 429);
+    if (!checkRateLimit(userId).success) {
+      return fail("Rate limit exceeded. Please wait a moment.", 429);
     }
 
-    const json = await req.json();
-    const body = replyBodySchema.parse(json);
+    let json;
+    try {
+      json = await req.json();
+    } catch {
+      return fail("Invalid JSON", 400);
+    }
+
+    const parsed = replyBodySchema.safeParse(json);
+    if (!parsed.success) {
+      return fail(parsed.error.issues?.[0]?.message || "Invalid input", 400);
+    }
+
+    const body = parsed.data;
 
     const data = (await generateStructured({
-      prompt: buildReplyPrompt(body.message, body.draftReply),
+      prompt: buildReplyPrompt(sanitizeUserText(body.message), sanitizeUserText(body.draftReply || "")),
       schema: replyResultSchema,
     })) as { suggestions: string[]; improvedReply: string };
 
@@ -30,8 +41,7 @@ export async function POST(req: Request) {
       improvedReply: data.improvedReply || "",
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to generate replies";
-    return fail(message, 400);
+    console.error("Reply API Error:", error);
+    return fail("An internal error occurred.", 500);
   }
 }
