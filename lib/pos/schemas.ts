@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const rewriteBodySchema = z.object({
-  text: z.string().min(1, "Text is required").max(5000, "Text is too long"), // Allow up to 5000 for scenario history
+  text: z.string().min(1, "Text is required").max(1000, "Text is too long"),
   tone: z.enum(["casual", "professional"]).optional(),
 });
 
@@ -12,6 +12,26 @@ export const checkBodySchema = z.object({
 export const replyBodySchema = z.object({
   message: z.string().min(1, "Message is required").max(1000, "Message is too long"),
   draftReply: z.string().max(1000, "Draft reply is too long").optional().default(""),
+});
+
+export const roleplayBodySchema = z.object({
+  scenarioId: z.enum([
+    "hr-interview",
+    "manager-project",
+    "formal-emails",
+    "cover-letter",
+    "resume-bullet",
+    "sop",
+    "interview-answer",
+    "gd-practice",
+  ]),
+  action: z.enum(["turn", "report"]),
+  messages: z.array(
+    z.object({
+      role: z.enum(["user", "assistant"]),
+      text: z.string().max(1000, "Message too long"),
+    })
+  ).max(30, "Too many messages"),
 });
 
 export const scenarioTurnSchema = z.object({

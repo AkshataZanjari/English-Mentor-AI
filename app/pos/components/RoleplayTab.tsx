@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
@@ -15,6 +16,7 @@ export function RoleplayTab() {
   const [reportLoading, setReportLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<ScenarioReport | null>(null);
+  const { isLoaded, userId } = useAuth();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const activeScenario = scenarioConfigs.find((s) => s.id === scenarioId) || scenarioConfigs[0];
@@ -46,19 +48,20 @@ export function RoleplayTab() {
 
     try {
       setLoading(true);
-      const transcript = newMessages.map((m) => `${m.role === "assistant" ? "Tutor" : "User"}: ${m.text}`).join("\n");
-      const prompt = `${activeScenario.systemPrompt}\nScenario:\n${activeScenario.title}\nTranscript so far:\n${transcript}\nLatest message:\n${text}`;
-      
-      const response = await fetch("/api/pos/rewrite", {
+      const response = await fetch("/api/pos/roleplay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: prompt, tone: "professional" }),
+        body: JSON.stringify({
+          scenarioId: activeScenario.id,
+          action: "turn",
+          messages: newMessages.map((m) => ({ role: m.role, text: m.text }))
+        }),
       });
 
       const payload = await response.json();
       if (!response.ok || !payload.success) throw new Error(payload.error || "Failed to respond");
       
-      const parsed = JSON.parse(payload.data.result);
+      const parsed = payload.data;
       const asstMsg: ScenarioMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -81,19 +84,20 @@ export function RoleplayTab() {
     try {
       setReportLoading(true);
       setError(null);
-      const transcript = messages.map((m) => `${m.role === "assistant" ? "Tutor" : "User"}: ${m.text}`).join("\n");
-      const prompt = `You are an English speaking coach. Analyze this transcript and create a report. Return JSON with mistakesSummary (array of 3 strings), betterPhrases (array of 3 strings), toneScore (1-10), and overallFeedback.\n\nTranscript:\n${transcript}`;
-      
-      const response = await fetch("/api/pos/rewrite", {
+      const response = await fetch("/api/pos/roleplay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: prompt, tone: "professional" }),
+        body: JSON.stringify({
+          scenarioId: activeScenario.id,
+          action: "report",
+          messages: messages.map((m) => ({ role: m.role, text: m.text }))
+        }),
       });
 
       const payload = await response.json();
       if (!response.ok || !payload.success) throw new Error(payload.error || "Failed to generate report");
       
-      setReport(JSON.parse(payload.data.result));
+      setReport(payload.data);
     } catch (err: unknown) {
       const e = err as Error;
       setError(e.message || "Failed to generate report.");
@@ -103,6 +107,19 @@ export function RoleplayTab() {
   }
 
 
+
+  if (!isLoaded) return <div className="animate-pulse h-32 bg-slate-800 rounded-xl"></div>;
+  if (!userId) {
+    return (
+      <Card className="text-center py-12">
+        <h2 className="text-xl font-semibold mb-2 text-slate-200">Sign in to use Roleplay AI</h2>
+        <p className="text-slate-400 mb-6">Create an account to practice speaking in realistic scenarios.</p>
+        <SignInButton mode="modal">
+          <Button variant="primary">Sign In</Button>
+        </SignInButton>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -171,7 +188,7 @@ export function RoleplayTab() {
                   }
                 }}
               />
-                <MicButton text={input} onTextUpdate={setInput} />
+                <MicButton text={input} onTextUpdate={setInput} className="absolute right-2 top-2" />
             </div>
             <div className="flex flex-col justify-between gap-2">
               <Button onClick={() => sendMessage()} disabled={loading || !input.trim()}>Send</Button>
