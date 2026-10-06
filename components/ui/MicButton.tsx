@@ -36,13 +36,24 @@ interface MicButtonProps {
 
 export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps) {
   const [listening, setListening] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const shouldKeepListeningRef = useRef(false);
   const initialTextRef = useRef("");
   const finalTranscriptRef = useRef("");
   const retryCountRef = useRef(0);
+  const lastStartTimeRef = useRef(0);
 
   useEffect(() => {
+    interface SpeechRecognitionConstructor {
+      new (): SpeechRecognition;
+    }
+    const SpeechRecognitionImpl = (window as unknown as { SpeechRecognition: SpeechRecognitionConstructor, webkitSpeechRecognition: SpeechRecognitionConstructor }).SpeechRecognition || 
+      (window as unknown as { SpeechRecognition: SpeechRecognitionConstructor, webkitSpeechRecognition: SpeechRecognitionConstructor }).webkitSpeechRecognition;
+    if (!SpeechRecognitionImpl) {
+      setSupported(false);
+    }
     return () => {
       shouldKeepListeningRef.current = false;
       if (recognitionRef.current) {
@@ -54,6 +65,7 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
   }, []);
 
   function toggleMic() {
+    if (!supported) return;
     if (listening) {
       shouldKeepListeningRef.current = false;
       recognitionRef.current?.stop();
@@ -66,11 +78,9 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
     }
     const SpeechRecognitionImpl = (window as unknown as { SpeechRecognition: SpeechRecognitionConstructor, webkitSpeechRecognition: SpeechRecognitionConstructor }).SpeechRecognition || 
       (window as unknown as { SpeechRecognition: SpeechRecognitionConstructor, webkitSpeechRecognition: SpeechRecognitionConstructor }).webkitSpeechRecognition;
-    if (!SpeechRecognitionImpl) {
-      alert("Voice input works in Chrome or Edge.");
-      return;
-    }
+    if (!SpeechRecognitionImpl) return;
 
+    setErrorMsg("");
     initialTextRef.current = text;
     finalTranscriptRef.current = "";
     retryCountRef.current = 0;
@@ -92,7 +102,7 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
 
       recognition.onstart = () => {
         setListening(true);
-        retryCountRef.current = 0;
+        lastStartTimeRef.current = Date.now();
       };
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -107,32 +117,46 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
         
         const spoken = finalTranscriptRef.current + interimTranscript;
         const base = initialTextRef.current;
-        const newText = base ? base + (base.endsWith(" ") ? "" : " ") + spoken : spoken;
+        const trimmedSpoken = spoken.trimStart();
+        const sep = (base && !base.match(/\s$/)) ? " " : "";
+        let newText = base + sep + trimmedSpoken;
+        newText = newText.replace(/ {2,}/g, ' '); // collapse double spaces
         onTextUpdate(newText);
       };
 
       recognition.onerror = (event: { error: string }) => {
         if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-          alert("Microphone permission is blocked. Allow it in your browser's address bar.");
+          setErrorMsg("Microphone permission blocked.");
           shouldKeepListeningRef.current = false;
         } else if (event.error === "audio-capture") {
-          alert("No microphone found.");
+          setErrorMsg("No microphone found.");
           shouldKeepListeningRef.current = false;
         } else if (event.error === "network") {
-          alert("Voice recognition needs an internet connection.");
+          setErrorMsg("No internet connection.");
           shouldKeepListeningRef.current = false;
         }
-        // no-speech is ignored, it will just end and restart if needed
       };
 
       recognition.onend = () => {
-        if (shouldKeepListeningRef.current && retryCountRef.current < 5) {
-          retryCountRef.current += 1;
-          setTimeout(() => {
-            if (shouldKeepListeningRef.current) {
-              startRecognition(SpeechRecognitionImpl);
-            }
-          }, 300);
+        if (shouldKeepListeningRef.current) {
+          const duration = Date.now() - lastStartTimeRef.current;
+          if (duration < 1500) {
+            retryCountRef.current += 1;
+          } else {
+            retryCountRef.current = 0;
+          }
+
+          if (retryCountRef.current < 5) {
+            setTimeout(() => {
+              if (shouldKeepListeningRef.current) {
+                startRecognition(SpeechRecognitionImpl);
+              }
+            }, 300);
+          } else {
+            setErrorMsg("No speech detected. Please try again.");
+            setListening(false);
+            shouldKeepListeningRef.current = false;
+          }
         } else {
           setListening(false);
           shouldKeepListeningRef.current = false;
@@ -148,14 +172,24 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
   }
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      className={`!p-2 text-xl ${listening ? "text-red-500 bg-red-500/10 animate-pulse" : "text-slate-400"} ${className}`}
-      onClick={toggleMic}
-      title={listening ? "Click the mic again to stop" : "Voice Input"}
-    >
-      {listening ? "🔴" : "🎤"}
-    </Button>
+    <div className={`flex flex-col items-end ${className}`}>
+      <Button
+        type="button"
+        variant="ghost"
+        disabled={!supported}
+        aria-label={listening ? "Stop voice input" : "Start voice input"}
+        aria-pressed={listening}
+        className={`!p-2 text-xl ${listening ? "text-red-500 bg-red-500/10 animate-pulse" : "text-slate-400"}`}
+        onClick={toggleMic}
+        title={!supported ? "Voice input works in Chrome or Edge" : listening ? "Click the mic again to stop" : "Voice Input"}
+      >
+        {listening ? "🔴" : "🎤"}
+      </Button>
+      {errorMsg && (
+        <div aria-live="polite" className="absolute right-0 top-full mt-1 text-xs text-red-400 p-1.5 bg-slate-800 rounded shadow-lg z-10 whitespace-nowrap">
+          {errorMsg}
+        </div>
+      )}
+    </div>
   );
 }
