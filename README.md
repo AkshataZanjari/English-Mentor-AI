@@ -11,7 +11,7 @@ English Mentor AI is a full-stack educational tool designed to help users improv
 - **AI-powered Grammar Checking:** Instant error explanation and gamified grammar score from 0–100.
 - **Practice Studio:** Comprehensive suite for tone rewriting, smart replies, and interactive scenario practice (Roleplay).
 - **Interactive Dashboard:** Visualizes persistent writing history, average score calculations, and daily learning streaks.
-- **Secure Authentication & Prompts:** User sessions and profiles powered by Clerk. Strict prompt sanitization prevents prompt injections.
+- **Secure Authentication & Prompts:** User sessions and profiles powered by Clerk. Input sanitization and delimiters reduce prompt-injection risk.
 
 ## 3. Screenshots
 
