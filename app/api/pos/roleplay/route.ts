@@ -37,14 +37,14 @@ export async function POST(req: Request) {
     // Sanitize user input in messages
     const sanitizedMessages = body.messages.map((m) => ({
       ...m,
-      text: m.role === "user" ? sanitizeUserText(m.text) : m.text,
+      text: sanitizeUserText(m.text),
     }));
 
     let prompt = "";
     if (body.action === "turn") {
-      prompt = buildScenarioTurnPrompt(body.scenarioId as import("@/app/pos/config").ScenarioId, sanitizedMessages as { role: "user" | "assistant"; text: string }[]);
+      prompt = buildScenarioTurnPrompt(body.scenarioId, sanitizedMessages as { role: "user" | "assistant"; text: string }[]);
     } else {
-      prompt = buildScenarioReportPrompt(body.scenarioId as import("@/app/pos/config").ScenarioId, sanitizedMessages as { role: "user" | "assistant"; text: string }[]);
+      prompt = buildScenarioReportPrompt(body.scenarioId, sanitizedMessages as { role: "user" | "assistant"; text: string }[]);
     }
 
     // Call Gemini

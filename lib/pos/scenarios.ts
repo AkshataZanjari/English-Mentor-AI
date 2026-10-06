@@ -1,4 +1,15 @@
-import { ScenarioId } from "../../app/pos/config";
+export const SCENARIO_IDS = [
+  "hr-interview",
+  "manager-project",
+  "formal-emails",
+  "cover-letter",
+  "resume-bullet",
+  "sop",
+  "interview-answer",
+  "gd-practice",
+] as const;
+
+export type ScenarioId = (typeof SCENARIO_IDS)[number];
 
 const scenarioPrompts: Record<ScenarioId, { systemPrompt: string; reportFocus: string }> = {
   "hr-interview": {

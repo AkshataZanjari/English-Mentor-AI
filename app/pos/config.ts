@@ -1,6 +1,6 @@
+import { ScenarioId } from "@/lib/pos/scenarios";
+export type { ScenarioId };
 export type ToneType = "casual" | "professional";
-
-export type ScenarioId = "hr-interview" | "manager-project" | "formal-emails" | "cover-letter" | "resume-bullet" | "sop" | "interview-answer" | "gd-practice";
 
 export type ScenarioConfig = {
   id: ScenarioId;

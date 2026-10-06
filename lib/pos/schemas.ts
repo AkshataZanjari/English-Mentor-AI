@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SCENARIO_IDS } from "./scenarios";
 
 export const rewriteBodySchema = z.object({
   text: z.string().min(1, "Text is required").max(1000, "Text is too long"),
@@ -15,16 +16,7 @@ export const replyBodySchema = z.object({
 });
 
 export const roleplayBodySchema = z.object({
-  scenarioId: z.enum([
-    "hr-interview",
-    "manager-project",
-    "formal-emails",
-    "cover-letter",
-    "resume-bullet",
-    "sop",
-    "interview-answer",
-    "gd-practice",
-  ]),
+  scenarioId: z.enum(SCENARIO_IDS),
   action: z.enum(["turn", "report"]),
   messages: z.array(
     z.object({
