@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const rewriteBodySchema = z.object({
   text: z.string().min(1, "Text is required").max(5000, "Text is too long"), // Allow up to 5000 for scenario history
-  tone: z.enum(["formal", "casual", "professional", "friendly"]).optional(),
+  tone: z.enum(["casual", "professional"]).optional(),
 });
 
 export const checkBodySchema = z.object({

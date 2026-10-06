@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     }
 
     const rewritten = await generatePlainText({
-      prompt: buildRewritePrompt(body.text, body.tone ?? "formal"),
+      prompt: buildRewritePrompt(body.text, body.tone ?? "professional"),
     });
 
     return ok({

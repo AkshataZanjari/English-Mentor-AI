@@ -21,10 +21,18 @@ describe("checkBodySchema", () => {
 
 describe("rewriteBodySchema", () => {
   it("should validate tone enum", () => {
-    const resultFormal = rewriteBodySchema.safeParse({ text: "Hi", tone: "formal" });
-    expect(resultFormal.success).toBe(true);
+    const resultProfessional = rewriteBodySchema.safeParse({ text: "Hi", tone: "professional" });
+    expect(resultProfessional.success).toBe(true);
 
     const resultInvalid = rewriteBodySchema.safeParse({ text: "Hi", tone: "invalid_tone" });
     expect(resultInvalid.success).toBe(false);
+
+    // @ts-expect-error testing invalid tone
+    const resultFormal = rewriteBodySchema.safeParse({ text: "Hi", tone: "formal" });
+    expect(resultFormal.success).toBe(false);
+
+    // @ts-expect-error testing invalid tone
+    const resultFriendly = rewriteBodySchema.safeParse({ text: "Hi", tone: "friendly" });
+    expect(resultFriendly.success).toBe(false);
   });
 });

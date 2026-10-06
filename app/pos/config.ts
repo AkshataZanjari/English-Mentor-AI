@@ -1,4 +1,4 @@
-export type ToneType = "formal" | "casual" | "professional" | "friendly";
+export type ToneType = "casual" | "professional";
 
 export type ScenarioId = "hr-interview" | "manager-project" | "formal-emails" | "cover-letter" | "resume-bullet" | "sop" | "interview-answer" | "gd-practice";
 

@@ -8,16 +8,14 @@ import { ToneType } from "../config";
 
 export function RewriteTab() {
   const [text, setText] = useState("");
-  const [tone, setTone] = useState<ToneType>("formal");
+  const [tone, setTone] = useState<ToneType>("professional");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const tones: { value: ToneType; label: string }[] = [
-    { value: "formal", label: "Formal" },
     { value: "casual", label: "Casual" },
     { value: "professional", label: "Professional" },
-    { value: "friendly", label: "Friendly" },
   ];
 
   async function rewriteTone() {
@@ -46,9 +44,6 @@ export function RewriteTab() {
     }
   }
 
-  function handleMicResult(transcript: string) {
-    setText((prev) => (prev ? prev + " " + transcript : transcript));
-  }
 
   return (
     <div className="space-y-6">
@@ -61,9 +56,7 @@ export function RewriteTab() {
               placeholder="Type or speak a sentence to rewrite..."
               className="h-32 pr-12"
             />
-            <div className="absolute top-2 right-2">
-              <MicButton onResult={handleMicResult} />
-            </div>
+              <MicButton text={text} onTextUpdate={setText} />
           </div>
           <div className="flex flex-wrap gap-2 items-center justify-between">
             <div className="flex flex-wrap gap-2">

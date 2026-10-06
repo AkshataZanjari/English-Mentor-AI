@@ -22,9 +22,9 @@ ${text}
 
 export function buildRewritePrompt(
   text: string,
-  tone?: "formal" | "casual" | "professional" | "friendly"
+  tone?: "casual" | "professional"
 ) {
-  const currentTone = tone || "formal";
+  const currentTone = tone || "professional";
   return `You are a writing assistant.
 
 Task:
@@ -33,8 +33,8 @@ Rewrite the user's text in a ${currentTone} style.
 Rules:
 - Keep the original meaning.
 - Make it natural, fluent, and grammatically correct.
-- If the tone is casual or friendly, it can be conversational.
-- If the tone is formal or professional, it should be polite and structured.
+- If the tone is casual, it can be conversational and relaxed.
+- If the tone is professional, it should be polite, clear, and workplace-appropriate.
 - Output ONLY the final rewritten text.
 - Do not explain anything.
 

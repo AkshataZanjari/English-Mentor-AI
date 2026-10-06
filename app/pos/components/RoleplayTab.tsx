@@ -52,7 +52,7 @@ export function RoleplayTab() {
       const response = await fetch("/api/pos/rewrite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: prompt, tone: "formal" }),
+        body: JSON.stringify({ text: prompt, tone: "professional" }),
       });
 
       const payload = await response.json();
@@ -87,7 +87,7 @@ export function RoleplayTab() {
       const response = await fetch("/api/pos/rewrite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: prompt, tone: "formal" }),
+        body: JSON.stringify({ text: prompt, tone: "professional" }),
       });
 
       const payload = await response.json();
@@ -102,9 +102,7 @@ export function RoleplayTab() {
     }
   }
 
-  function handleMicResult(transcript: string) {
-    setInput((prev) => (prev ? prev + " " + transcript : transcript));
-  }
+
 
   return (
     <div className="space-y-6">
@@ -173,9 +171,7 @@ export function RoleplayTab() {
                   }
                 }}
               />
-              <div className="absolute top-2 right-2">
-                <MicButton onResult={handleMicResult} />
-              </div>
+                <MicButton text={input} onTextUpdate={setInput} />
             </div>
             <div className="flex flex-col justify-between gap-2">
               <Button onClick={() => sendMessage()} disabled={loading || !input.trim()}>Send</Button>

@@ -41,12 +41,7 @@ export function ReplyTab() {
     }
   }
 
-  function handleMicResultMsg(transcript: string) {
-    setMessage((prev) => (prev ? prev + " " + transcript : transcript));
-  }
-  function handleMicResultDraft(transcript: string) {
-    setDraftReply((prev) => (prev ? prev + " " + transcript : transcript));
-  }
+
 
   return (
     <div className="space-y-6">
@@ -61,9 +56,7 @@ export function ReplyTab() {
                 placeholder="Paste the email or message you received..."
                 className="h-24 pr-12"
               />
-              <div className="absolute top-2 right-2">
-                <MicButton onResult={handleMicResultMsg} />
-              </div>
+                <MicButton text={message} onTextUpdate={setMessage} />
             </div>
           </div>
           <div className="space-y-2">
@@ -75,9 +68,7 @@ export function ReplyTab() {
                 placeholder="I want to say yes, tomorrow at 10am..."
                 className="h-20 pr-12"
               />
-              <div className="absolute top-2 right-2">
-                <MicButton onResult={handleMicResultDraft} />
-              </div>
+                <MicButton text={draftReply} onTextUpdate={setDraftReply} />
             </div>
           </div>
           <div className="flex justify-end">

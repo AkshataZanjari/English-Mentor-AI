@@ -120,7 +120,11 @@ Run evaluation script against the sample dataset (requires GEMINI_API_KEY):
 npm run eval
 ```
 
-## 12. Author
+## 12. Troubleshooting
+
+- **Voice Input Not Working:** The microphone feature relies on the Web Speech API, which is fully supported only in Google Chrome and Microsoft Edge. You must allow microphone permissions in your browser. Additionally, voice input requires the site to be served over HTTPS (or `localhost` during development).
+
+## 13. Author
 
 Akshata Zanjari  
 B.Tech Information Technology
