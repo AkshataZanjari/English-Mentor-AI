@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -77,11 +77,18 @@ Important rules:
     });
     const data = rawData as z.infer<typeof grammarCheckResultSchema>;
 
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
+    try {
+      const user = await currentUser();
+      const dbUser = await prisma.user.upsert({
+        where: { clerkId: userId },
+        update: {},
+        create: {
+          clerkId: userId,
+          name: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "",
+          email: user?.emailAddresses[0]?.emailAddress || "",
+        },
+      });
 
-    if (dbUser) {
       await prisma.grammarCheckHistory.create({
         data: {
           userId: dbUser.id,
@@ -109,6 +116,8 @@ Important rules:
           lastPracticeAt: now
         }
       });
+    } catch (dbErr) {
+      console.error("Database save failed:", dbErr);
     }
 
     return NextResponse.json(data);
