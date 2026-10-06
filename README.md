@@ -101,12 +101,26 @@ CLERK_SECRET_KEY=your_clerk_secret_key
 english-mentor-ai/
 ├── app/                  # Next.js App Router (pages, layouts, api routes)
 ├── components/           # Reusable React components (UI, charts, grammar tools)
+├── eval/                 # Evaluation dataset and scripts for model accuracy
 ├── lib/                  # Utility functions and shared configuration (Prisma, Gemini)
 ├── prisma/               # Database schema
-└── scripts/              # Development scripts and utilities
+├── scripts/              # Development scripts and utilities
+├── tests/                # Vitest unit tests for business logic
 ```
 
-## 11. Author
+## 11. Testing and Evaluation
+
+Run unit tests for logic and schemas:
+```bash
+npm run test
+```
+
+Run evaluation script against the sample dataset (requires GEMINI_API_KEY):
+```bash
+npm run eval
+```
+
+## 12. Author
 
 Akshata Zanjari  
 B.Tech Information Technology

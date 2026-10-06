@@ -3,12 +3,18 @@ import { replyBodySchema, replyResultSchema } from "@/lib/pos/schemas";
 import { buildReplyPrompt } from "@/lib/pos/prompts";
 import { generateStructured } from "@/lib/pos/model";
 import { fail, ok } from "@/lib/pos/response";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return fail("Unauthorized", 401);
+    }
+
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown-ip";
+    if (!checkRateLimit(ip)) {
+      return fail("Rate limit exceeded", 429);
     }
 
     const json = await req.json();

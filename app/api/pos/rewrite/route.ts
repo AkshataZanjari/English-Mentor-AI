@@ -8,6 +8,7 @@ import { buildRewritePrompt } from "@/lib/pos/prompts";
 import { generatePlainText } from "@/lib/pos/model";
 import { fail, ok } from "@/lib/pos/response";
 import { safeJsonParse } from "@/lib/pos/parser";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 function looksLikeScenarioTurnPrompt(text: string) {
   return (
@@ -30,6 +31,11 @@ export async function POST(req: Request) {
     const { userId } = await auth();
     if (!userId) {
       return fail("Unauthorized", 401);
+    }
+
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown-ip";
+    if (!checkRateLimit(ip)) {
+      return fail("Rate limit exceeded", 429);
     }
 
     const json = await req.json();

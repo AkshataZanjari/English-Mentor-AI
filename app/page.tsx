@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import GrammarChecker from "@/components/GrammarChecker";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function Home() {
   useEffect(() => {
@@ -11,9 +12,12 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="p-10">
-      <h1 className="text-4xl font-bold text-center mb-8">English Mentor AI</h1>
+    <>
+      <PageHeader 
+        title="Check Grammar"
+        description="Instantly correct and improve your sentences."
+      />
       <GrammarChecker />
-    </main>
+    </>
   );
 }
