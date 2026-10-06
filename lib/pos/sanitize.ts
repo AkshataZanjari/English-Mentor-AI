@@ -1,4 +1,10 @@
 export function sanitizeUserText(text: string): string {
   if (!text) return text;
-  return text.replace(/<\/?user_text>/gi, "");
+  let previous = "";
+  let current = text;
+  while (current !== previous) {
+    previous = current;
+    current = current.replace(/<\s*\/?\s*user_text[^>]*>/gi, "");
+  }
+  return current;
 }
