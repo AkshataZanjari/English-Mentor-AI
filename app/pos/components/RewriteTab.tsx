@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
@@ -12,6 +13,7 @@ export function RewriteTab() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isLoaded, userId } = useAuth();
 
   const tones: { value: ToneType; label: string }[] = [
     { value: "casual", label: "Casual" },
@@ -45,6 +47,19 @@ export function RewriteTab() {
   }
 
 
+  if (!isLoaded) return <div className="animate-pulse h-32 bg-slate-800 rounded-xl"></div>;
+  if (!userId) {
+    return (
+      <Card className="text-center py-12">
+        <h2 className="text-xl font-semibold mb-2 text-slate-200">Sign in to use Rewrite AI</h2>
+        <p className="text-slate-400 mb-6">Create an account to quickly rewrite your text professionally.</p>
+        <SignInButton mode="modal">
+          <Button variant="primary">Sign In</Button>
+        </SignInButton>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -56,7 +71,7 @@ export function RewriteTab() {
               placeholder="Type or speak a sentence to rewrite..."
               className="h-32 pr-12"
             />
-              <MicButton text={text} onTextUpdate={setText} />
+              <MicButton text={text} onTextUpdate={setText} className="absolute right-2 top-2" />
           </div>
           <div className="flex flex-wrap gap-2 items-center justify-between">
             <div className="flex flex-wrap gap-2">

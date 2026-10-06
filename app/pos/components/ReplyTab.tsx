@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
@@ -12,6 +13,7 @@ export function ReplyTab() {
   const [improvedReply, setImprovedReply] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isLoaded, userId } = useAuth();
 
   async function generateReplies() {
     if (!message.trim()) return;
@@ -43,6 +45,19 @@ export function ReplyTab() {
 
 
 
+  if (!isLoaded) return <div className="animate-pulse h-32 bg-slate-800 rounded-xl"></div>;
+  if (!userId) {
+    return (
+      <Card className="text-center py-12">
+        <h2 className="text-xl font-semibold mb-2 text-slate-200">Sign in to use Reply AI</h2>
+        <p className="text-slate-400 mb-6">Create an account to generate professional replies to emails and messages.</p>
+        <SignInButton mode="modal">
+          <Button variant="primary">Sign In</Button>
+        </SignInButton>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -56,7 +71,7 @@ export function ReplyTab() {
                 placeholder="Paste the email or message you received..."
                 className="h-24 pr-12"
               />
-                <MicButton text={message} onTextUpdate={setMessage} />
+                <MicButton text={message} onTextUpdate={setMessage} className="absolute right-2 top-2" />
             </div>
           </div>
           <div className="space-y-2">
@@ -68,7 +83,7 @@ export function ReplyTab() {
                 placeholder="I want to say yes, tomorrow at 10am..."
                 className="h-20 pr-12"
               />
-                <MicButton text={draftReply} onTextUpdate={setDraftReply} />
+                <MicButton text={draftReply} onTextUpdate={setDraftReply} className="absolute right-2 top-2" />
             </div>
           </div>
           <div className="flex justify-end">
