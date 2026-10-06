@@ -20,8 +20,7 @@
     "react": "^19.1.4",
     "react-dom": "^19.1.4",
     "recharts": "^2.15.4",
-    "tinyglobby": "^0.2.17",
-    "vite": "^8.3.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
