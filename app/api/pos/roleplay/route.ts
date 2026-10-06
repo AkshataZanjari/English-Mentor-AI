@@ -42,9 +42,9 @@ export async function POST(req: Request) {
 
     let prompt = "";
     if (body.action === "turn") {
-      prompt = buildScenarioTurnPrompt(body.scenarioId as import("@/app/pos/config").ScenarioId, sanitizedMessages as any);
+      prompt = buildScenarioTurnPrompt(body.scenarioId as import("@/app/pos/config").ScenarioId, sanitizedMessages as { role: "user" | "assistant"; text: string }[]);
     } else {
-      prompt = buildScenarioReportPrompt(body.scenarioId as import("@/app/pos/config").ScenarioId, sanitizedMessages as any);
+      prompt = buildScenarioReportPrompt(body.scenarioId as import("@/app/pos/config").ScenarioId, sanitizedMessages as { role: "user" | "assistant"; text: string }[]);
     }
 
     // Call Gemini
