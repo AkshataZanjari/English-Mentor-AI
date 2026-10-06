@@ -103,7 +103,7 @@ async function DashboardContent() {
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-6">Grammar Score Trend</h2>
         {chartData.length > 0 ? (
-          <div className="min-h-[300px]">
+          <div className="h-[300px] w-full">
             <ProgressChart data={chartData} />
           </div>
         ) : (
