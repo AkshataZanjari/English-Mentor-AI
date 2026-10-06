@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { checkBodySchema, rewriteBodySchema } from "../lib/pos/schemas";
+import { checkBodySchema, rewriteBodySchema, roleplayBodySchema } from "../lib/pos/schemas";
 
 describe("checkBodySchema", () => {
   it("should validate a correct payload", () => {
@@ -27,12 +27,55 @@ describe("rewriteBodySchema", () => {
     const resultInvalid = rewriteBodySchema.safeParse({ text: "Hi", tone: "invalid_tone" });
     expect(resultInvalid.success).toBe(false);
 
-    // @ts-expect-error testing invalid tone
     const resultFormal = rewriteBodySchema.safeParse({ text: "Hi", tone: "formal" });
     expect(resultFormal.success).toBe(false);
 
-    // @ts-expect-error testing invalid tone
     const resultFriendly = rewriteBodySchema.safeParse({ text: "Hi", tone: "friendly" });
     expect(resultFriendly.success).toBe(false);
+  });
+
+  it("should reject extremely long text over 1000", () => {
+    const longText = "a".repeat(1001);
+    const result = rewriteBodySchema.safeParse({ text: longText });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("roleplayBodySchema", () => {
+  it("should validate a valid body", () => {
+    const result = roleplayBodySchema.safeParse({
+      scenarioId: "hr-interview",
+      action: "turn",
+      messages: [{ role: "user", text: "Hi" }]
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject an unknown scenarioId", () => {
+    const result = roleplayBodySchema.safeParse({
+      scenarioId: "unknown-scenario",
+      action: "turn",
+      messages: [{ role: "user", text: "Hi" }]
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject more than 30 messages", () => {
+    const messages = Array.from({ length: 31 }).map(() => ({ role: "user", text: "Hi" }));
+    const result = roleplayBodySchema.safeParse({
+      scenarioId: "hr-interview",
+      action: "turn",
+      messages
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject a message over 1000 characters", () => {
+    const result = roleplayBodySchema.safeParse({
+      scenarioId: "hr-interview",
+      action: "turn",
+      messages: [{ role: "user", text: "a".repeat(1001) }]
+    });
+    expect(result.success).toBe(false);
   });
 });

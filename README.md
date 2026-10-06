@@ -4,14 +4,14 @@ An AI-powered English learning platform that analyzes grammar, improves writing,
 
 ## 1. Project overview
 
-English Mentor AI is a full-stack educational tool designed to help users improve their English writing skills. Instead of just pointing out mistakes, the platform provides clear explanations, detailed grammar scoring, and tracks your improvement over time through a personalized dashboard. It is built for students, professionals, and language learners looking to perfect their everyday English.
+English Mentor AI is a full-stack educational tool designed to help users improve their English writing and speaking skills. Instead of just pointing out mistakes, the platform provides clear explanations, detailed grammar scoring, and tracks your improvement over time through a personalized dashboard. It is built for students, professionals, and language learners looking to perfect their everyday English.
 
 ## 2. Key features
 
 - **AI-powered Grammar Checking:** Instant error explanation and gamified grammar score from 0–100.
-- **Practice Studio:** Comprehensive suite for tone rewriting, smart replies, scenario practice, and part-of-speech tools.
+- **Practice Studio:** Comprehensive suite for tone rewriting, smart replies, interactive scenario practice (Roleplay), and part-of-speech tools.
 - **Interactive Dashboard:** Visualizes persistent writing history, average score calculations, and daily learning streaks.
-- **Secure Authentication:** User sessions and profiles powered by Clerk.
+- **Secure Authentication & Prompts:** User sessions and profiles powered by Clerk. Strict prompt sanitization prevents prompt injections.
 
 ## 3. Screenshots
 
@@ -34,7 +34,7 @@ To deploy this project:
 ## 5. Tech stack
 
 - **Frontend:** Next.js (App Router), React, Tailwind CSS, Recharts
-- **Backend/API:** Next.js API Routes
+- **Backend/API:** Next.js API Routes (Zod validation, rate limiting)
 - **Database:** Prisma ORM, Neon PostgreSQL
 - **Authentication:** Clerk
 - **AI Integration:** Google Gemini API
@@ -42,13 +42,18 @@ To deploy this project:
 ## 6. Architecture
 
 User
-→ Next.js UI
+→ Next.js UI (Client checks auth & supported browser capabilities)
 → Clerk Authentication
-→ Next.js API Routes
-→ Gemini AI (Grammar & Tone Processing)
+→ Next.js API Routes (Rate Limit -> Schema Validation -> Sanitization)
+→ Gemini AI (Grammar, Tone Processing, Roleplay Generation)
 → Prisma ORM
 → Neon PostgreSQL
 → Dashboard / Learning History
+
+### Security Notes
+- All system prompts are isolated on the server (`lib/pos/scenarios.ts` and `lib/pos/prompts.ts`).
+- User input is stripped of XML tags (`<user_text>`) using `sanitizeUserText` to prevent prompt injection attacks.
+- Inputs are strictly validated using `Zod` schemas before hitting the AI model.
 
 ## 7. Database
 
@@ -101,11 +106,11 @@ CLERK_SECRET_KEY=your_clerk_secret_key
 english-mentor-ai/
 ├── app/                  # Next.js App Router (pages, layouts, api routes)
 ├── components/           # Reusable React components (UI, charts, grammar tools)
-├── eval/                 # Evaluation dataset and scripts for model accuracy
-├── lib/                  # Utility functions and shared configuration (Prisma, Gemini)
+├── eval/                 # Evaluation dataset and scripts for model accuracy (Grammar & Roleplay)
+├── lib/                  # Utility functions and shared configuration (Prisma, Gemini, Rate Limiting, Sanitization)
 ├── prisma/               # Database schema
 ├── scripts/              # Development scripts and utilities
-├── tests/                # Vitest unit tests for business logic
+├── tests/                # Vitest unit tests for schemas, logic, and sanitization
 ```
 
 ## 11. Testing and Evaluation
