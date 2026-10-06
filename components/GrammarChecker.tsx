@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -25,6 +26,8 @@ export default function GrammarChecker() {
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isLoaded, userId } = useAuth();
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   async function checkGrammar() {
     if (!sentence.trim()) return;
@@ -40,6 +43,12 @@ export default function GrammarChecker() {
       
       const data = await res.json();
       
+      if (res.status === 401) {
+        setSessionExpired(true);
+        setResult(null);
+        return;
+      }
+      
       if (!res.ok) {
         setError(data.error || "An error occurred while checking grammar.");
         setResult(null);
@@ -52,6 +61,19 @@ export default function GrammarChecker() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!isLoaded) return <div className="animate-pulse h-32 bg-slate-800 rounded-xl"></div>;
+  if (!userId || sessionExpired) {
+    return (
+      <Card className="text-center py-12">
+        <h2 className="text-xl font-semibold mb-2 text-slate-200">Sign in to check your grammar and track your progress</h2>
+        <p className="text-slate-400 mb-6">Create an account to improve your English skills.</p>
+        <SignInButton mode="modal">
+          <Button variant="primary">Sign In</Button>
+        </SignInButton>
+      </Card>
+    );
   }
 
   return (
