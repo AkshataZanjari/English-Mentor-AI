@@ -8,13 +8,13 @@ vi.mock("ai", () => ({
       const onAbort = () => {
         reject(new Error("AI response timed out"));
       };
-      
+
       if (abortSignal.aborted) {
         onAbort();
       } else {
         abortSignal.addEventListener("abort", onAbort);
       }
-      
+
       // Simulate a long-running AI generation that will never finish in time
       setTimeout(() => {
         resolve({ text: "Simulated response" });

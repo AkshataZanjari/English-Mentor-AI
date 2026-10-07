@@ -1,5 +1,6 @@
 import { ScenarioId } from "@/lib/pos/scenarios";
-export type { ScenarioId };
+import { ScenarioReport, ScenarioTurn } from "@/lib/pos/schemas";
+export type { ScenarioId, ScenarioReport, ScenarioTurn as ScenarioTurnResult };
 export type ToneType = "casual" | "professional";
 
 export type ScenarioConfig = {
@@ -19,20 +20,6 @@ export type ScenarioMessage = {
   correction?: string;
   naturalAlternative?: string;
   feedback?: string;
-};
-
-export type ScenarioTurnResult = {
-  assistantReply: string;
-  correction: string;
-  naturalAlternative: string;
-  feedback: string;
-};
-
-export type ScenarioReport = {
-  mistakesSummary: string[];
-  betterPhrases: string[];
-  toneScore: number;
-  overallFeedback: string;
 };
 
 export const scenarioConfigs: ScenarioConfig[] = [

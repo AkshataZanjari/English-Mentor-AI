@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { Badge } from "@/components/ui/Badge";
-import { ensureDbUser } from "@/lib/auth/user";
+import { ensureDbUser, displayName } from "@/lib/auth/user";
 import { getActiveStreak } from "@/lib/streak";
 
 export default function DashboardPage() {
@@ -57,7 +57,7 @@ async function DashboardContent() {
 
   const avgScore = avgResult._avg.score ? Math.round(avgResult._avg.score) : 0;
 
-  const activeStreak = getActiveStreak(dbUser.lastPracticeAt, dbUser.streakCount);
+  const activeStreak = getActiveStreak(dbUser.lastPracticeAt, dbUser.streakCount, new Date(), dbUser.timeZone ?? "UTC");
 
   const chartData = historyRecords
     .slice(0, 20)
@@ -71,7 +71,7 @@ async function DashboardContent() {
     <PageContainer>
       <div className="space-y-6 sm:space-y-8">
         <PageHeader
-        title={`Welcome back, ${dbUser.name}`}
+        title={`Welcome back, ${displayName(dbUser)}`}
         description="Track your English learning progress over time."
       />
 

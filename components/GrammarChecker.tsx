@@ -50,10 +50,11 @@ export default function GrammarChecker() {
     setError(null);
     setShowDetails(false);
     try {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const res = await fetch("/api/grammar-check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sentence }),
+        body: JSON.stringify({ sentence, timeZone }),
       });
 
       const data = await res.json();

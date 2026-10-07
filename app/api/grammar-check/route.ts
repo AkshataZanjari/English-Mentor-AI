@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generateStructured } from "@/lib/pos/model";
 import { checkRateLimit } from "@/lib/rateLimit";
-import { calculateNewStreak } from "@/lib/streak";
+import { calculateNewStreak, resolveTimeZone } from "@/lib/streak";
 import { sanitizeUserText } from "@/lib/pos/sanitize";
 
 const sentenceSchema = z.string().min(1).max(1000);
@@ -23,6 +23,8 @@ const grammarCheckResultSchema = z.object({
   score: z.number().int().min(0).max(100),
   scoreExplanation: z.string(),
 });
+
+export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
@@ -97,11 +99,14 @@ Important rules:
       });
 
       const now = new Date();
+      const tz = resolveTimeZone(body?.timeZone);
+
       const { newStreak, newLongest } = calculateNewStreak(
         dbUser.lastPracticeAt,
         dbUser.streakCount,
         dbUser.longestStreak,
-        now
+        now,
+        tz
       );
 
       await prisma.user.update({
@@ -109,7 +114,8 @@ Important rules:
         data: {
           streakCount: newStreak,
           longestStreak: newLongest,
-          lastPracticeAt: now
+          lastPracticeAt: now,
+          timeZone: tz
         }
       });
     } catch (dbErr) {
@@ -121,6 +127,12 @@ Important rules:
     return NextResponse.json({ ...data, saved, warning: saveWarning });
   } catch (err: unknown) {
     console.error("Grammar API error:", err);
+    if (err instanceof Error && err.message === "AI response timed out") {
+      return NextResponse.json(
+        { error: "AI response timed out. Please try again." },
+        { status: 504 }
+      );
+    }
     return NextResponse.json(
       { error: "An internal error occurred." },
       { status: 500 }

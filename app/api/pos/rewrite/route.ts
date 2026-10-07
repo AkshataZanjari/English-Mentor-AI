@@ -6,6 +6,8 @@ import { fail, ok } from "@/lib/pos/response";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { sanitizeUserText } from "@/lib/pos/sanitize";
 
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -40,6 +42,9 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Rewrite API Error:", error);
+    if (error instanceof Error && error.message === "AI response timed out") {
+      return fail("AI response timed out. Please try again.", 504);
+    }
     return fail("An internal error occurred.", 500);
   }
 }

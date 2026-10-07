@@ -88,7 +88,7 @@ export function RewriteTab() {
                 </Button>
               ))}
             </div>
-            <Button onClick={rewriteTone} disabled={loading || !text.trim()} className="w-full sm:w-auto">
+            <Button onClick={rewriteTone} disabled={loading || !text.trim()} className="w-full sm:w-auto min-h-[44px] sm:min-h-0">
               {loading ? "Rewriting..." : "Rewrite"}
             </Button>
           </div>

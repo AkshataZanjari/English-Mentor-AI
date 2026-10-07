@@ -18,7 +18,7 @@ export default function Error({
       <div className="glass-card p-8 max-w-md w-full text-center space-y-4">
         <h2 className="text-2xl font-bold text-red-400">Something went wrong!</h2>
         <p className="text-white/70">
-          We encountered an error loading your dashboard. If you are experiencing authentication issues, it may be due to your computer's clock being incorrect (clock skew).
+          We encountered an error loading your dashboard. If you are experiencing authentication issues, it may be due to your computer&apos;s clock being incorrect (clock skew).
         </p>
         <p className="text-white/70 font-mono text-sm break-words bg-black/20 p-2 rounded">
           {error.message}

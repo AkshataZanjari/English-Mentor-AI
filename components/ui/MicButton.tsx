@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "./Button";
+import { joinTranscriptSegments } from "@/lib/voice";
 
 interface SpeechRecognitionEvent {
   resultIndex: number;
@@ -36,7 +37,11 @@ interface MicButtonProps {
 
 export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps) {
   const [listening, setListening] = useState(false);
-  const [supported, setSupported] = useState(true);
+  const [supported] = useState(() => {
+    if (typeof window === "undefined") return true; // assume true during SSR
+    const win = window as unknown as { SpeechRecognition?: unknown, webkitSpeechRecognition?: unknown };
+    return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
+  });
   const [errorMsg, setErrorMsg] = useState("");
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const shouldKeepListeningRef = useRef(false);
@@ -46,14 +51,6 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
   const lastStartTimeRef = useRef(0);
 
   useEffect(() => {
-    interface SpeechRecognitionConstructor {
-      new (): SpeechRecognition;
-    }
-    const SpeechRecognitionImpl = (window as unknown as { SpeechRecognition: SpeechRecognitionConstructor, webkitSpeechRecognition: SpeechRecognitionConstructor }).SpeechRecognition || 
-      (window as unknown as { SpeechRecognition: SpeechRecognitionConstructor, webkitSpeechRecognition: SpeechRecognitionConstructor }).webkitSpeechRecognition;
-    if (!SpeechRecognitionImpl) {
-      setSupported(false);
-    }
     return () => {
       shouldKeepListeningRef.current = false;
       if (recognitionRef.current) {
@@ -109,17 +106,16 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
         let interimTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            finalTranscriptRef.current += event.results[i][0].transcript;
+            finalTranscriptRef.current = joinTranscriptSegments(finalTranscriptRef.current, event.results[i][0].transcript);
           } else {
             interimTranscript += event.results[i][0].transcript;
           }
         }
         
-        const spoken = finalTranscriptRef.current + interimTranscript;
+        const spoken = joinTranscriptSegments(finalTranscriptRef.current, interimTranscript);
         const base = initialTextRef.current;
         const trimmedSpoken = spoken.trimStart();
-        const sep = (base && !base.match(/\s$/)) ? " " : "";
-        let newText = base + sep + trimmedSpoken;
+        let newText = joinTranscriptSegments(base, trimmedSpoken);
         newText = newText.replace(/ {2,}/g, ' '); // collapse double spaces
         onTextUpdate(newText);
       };
@@ -179,7 +175,7 @@ export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps
         disabled={!supported}
         aria-label={listening ? "Stop voice input" : "Start voice input"}
         aria-pressed={listening}
-        className={`!p-2 text-xl ${listening ? "text-red-500 bg-red-500/10 animate-pulse" : "text-slate-400"}`}
+        className={`!p-2 text-xl min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${listening ? "text-red-500 bg-red-500/10 animate-pulse" : "text-slate-400"}`}
         onClick={toggleMic}
         title={!supported ? "Voice input works in Chrome or Edge" : listening ? "Click the mic again to stop" : "Voice Input"}
       >

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateNewStreak } from "../lib/streak";
+import { calculateNewStreak, resolveTimeZone } from "../lib/streak";
 
 describe("calculateNewStreak", () => {
   it("should start a new streak if lastPracticeAt is null", () => {
@@ -54,5 +54,30 @@ describe("calculateNewStreak", () => {
     // In UTC these are the same day (Oct 10). In Asia/Kolkata they are consecutive days (Oct 10 -> Oct 11).
     const { newStreak } = calculateNewStreak(date3, 1, 1, date4, "Asia/Kolkata");
     expect(newStreak).toBe(2); // Consecutive day (incremented)
+  });
+});
+
+describe("resolveTimeZone", () => {
+  it("should return the given timezone if valid", () => {
+    expect(resolveTimeZone("Asia/Kolkata")).toBe("Asia/Kolkata");
+    expect(resolveTimeZone("America/New_York")).toBe("America/New_York");
+  });
+
+  it("should fallback to UTC for invalid timezones", () => {
+    expect(resolveTimeZone("Invalid/Zone")).toBe("UTC");
+    expect(resolveTimeZone("")).toBe("UTC");
+    expect(resolveTimeZone(undefined)).toBe("UTC");
+  });
+
+  it("should handle IST same-day correctly", () => {
+    // Both times are the same day in IST
+    const lastPractice = new Date("2023-01-01T21:00:00Z"); // 1st Jan 21:00 UTC = 2nd Jan 02:30 IST
+    const now = new Date("2023-01-02T10:00:00Z"); // 2nd Jan 10:00 UTC = 2nd Jan 15:30 IST
+
+    const tz = resolveTimeZone("Asia/Kolkata");
+    const { newStreak } = calculateNewStreak(lastPractice, 1, 1, now, tz);
+
+    // In IST, they are the same day (2nd Jan), so streak should not increment
+    expect(newStreak).toBe(1);
   });
 });

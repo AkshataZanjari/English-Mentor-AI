@@ -61,10 +61,10 @@ function AuthControls({ isLoaded, user }: { isLoaded: boolean; user: any }) {
     <>
       <SignedOut>
         <SignInButton mode="modal">
-          <Button variant="ghost" className="px-3 py-1.5 text-xs sm:text-sm" aria-label="Sign in">Sign in</Button>
+          <Button variant="ghost" className="px-3 py-1.5 text-xs sm:text-sm min-h-[44px] sm:min-h-0" aria-label="Sign in">Sign in</Button>
         </SignInButton>
         <SignUpButton mode="modal">
-          <Button variant="primary" className="px-3 py-1.5 text-xs sm:text-sm" aria-label="Sign up">Sign up</Button>
+          <Button variant="primary" className="px-3 py-1.5 text-xs sm:text-sm min-h-[44px] sm:min-h-0" aria-label="Sign up">Sign up</Button>
         </SignUpButton>
       </SignedOut>
       <SignedIn>
@@ -73,7 +73,7 @@ function AuthControls({ isLoaded, user }: { isLoaded: boolean; user: any }) {
         </span>
         <UserButton />
         <SignOutButton redirectUrl="/">
-          <Button variant="ghost" className="px-3 py-1.5 text-xs sm:text-sm" aria-label="Sign out">Sign out</Button>
+          <Button variant="ghost" className="px-3 py-1.5 text-xs sm:text-sm min-h-[44px] sm:min-h-0" aria-label="Sign out">Sign out</Button>
         </SignOutButton>
       </SignedIn>
     </>

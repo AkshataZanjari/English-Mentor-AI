@@ -51,9 +51,7 @@ export const replyResultSchema = z.object({
 });
 
 export type RewriteBody = z.infer<typeof rewriteBodySchema>;
-export type CheckBody = z.infer<typeof checkBodySchema>;
 export type ReplyBody = z.infer<typeof replyBodySchema>;
 export type ScenarioTurn = z.infer<typeof scenarioTurnSchema>;
 export type ScenarioReport = z.infer<typeof scenarioReportSchema>;
-export type CheckResult = z.infer<typeof checkResultSchema>;
 export type ReplyResult = z.infer<typeof replyResultSchema>;

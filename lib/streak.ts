@@ -13,6 +13,16 @@ function getStartOfDayInTimeZone(date: Date, timeZone: string): Date {
   return new Date(Date.UTC(year, month, day));
 }
 
+export function resolveTimeZone(tz?: string | null): string {
+  if (!tz) return 'UTC';
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return tz;
+  } catch {
+    return 'UTC';
+  }
+}
+
 export function calculateNewStreak(
   lastPracticeAt: Date | null,
   currentStreak: number,

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { MicButton } from "@/components/ui/MicButton";
 import { Badge } from "@/components/ui/Badge";
 import { ScenarioId, scenarioConfigs, ScenarioMessage, ScenarioReport } from "../config";
+import { shouldShowCorrection } from "@/lib/pos/roleplay";
 
 export function RoleplayTab() {
   const [scenarioId, setScenarioId] = useState<ScenarioId>("hr-interview");
@@ -21,20 +22,23 @@ export function RoleplayTab() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const activeScenario = scenarioConfigs.find((s) => s.id === scenarioId) || scenarioConfigs[0];
 
-  useEffect(() => {
-    startScenario();
-  }, [scenarioId]);
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  function startScenario() {
+  const startScenario = useCallback(() => {
     setMessages([{ id: crypto.randomUUID(), role: "assistant", text: activeScenario.starter }]);
     setInput("");
     setError(null);
     setReport(null);
-  }
+  }, [activeScenario.starter]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      startScenario();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [scenarioId, startScenario]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   async function sendMessage(textOverride?: string) {
     const text = (textOverride || input).trim();
@@ -143,7 +147,7 @@ export function RoleplayTab() {
         {/* Header Row */}
         <div className="flex justify-between items-center pb-3 mb-3 border-b border-slate-800">
           <h3 className="font-semibold text-slate-200">{activeScenario.title}</h3>
-          <Button variant="secondary" className="px-3 py-1.5 text-xs" onClick={generateReport} disabled={reportLoading || messages.length < 2}>
+          <Button variant="secondary" className="px-3 py-1.5 text-xs min-h-[44px] sm:min-h-0" onClick={generateReport} disabled={reportLoading || messages.length < 2}>
             {reportLoading ? "Analyzing..." : "End & Grade"}
           </Button>
         </div>
@@ -157,14 +161,14 @@ export function RoleplayTab() {
               </div>
               {m.role === "assistant" && m.correction && (
                 <div className="mt-2 ml-2 max-w-[85%] text-xs space-y-1">
-                  {m.correction && m.correction !== messages[index - 1]?.text && (
+                  {shouldShowCorrection(m.correction, messages, index) && (
                     <p className="text-slate-400">Grammar: <span className="text-slate-200">{m.correction}</span></p>
                   )}
                   {m.naturalAlternative && (
                     <p className="text-slate-400">Better: <span className="text-green-400">{m.naturalAlternative}</span></p>
                   )}
                   {m.feedback && (
-                    <p className="text-purple-400 italic">"{m.feedback}"</p>
+                    <p className="text-purple-400 italic">&quot;{m.feedback}&quot;</p>
                   )}
                 </div>
               )}
@@ -206,7 +210,7 @@ export function RoleplayTab() {
           />
           <MicButton text={input} onTextUpdate={setInput} className="absolute right-2 top-4" />
           <Button
-            className="absolute right-2 bottom-3 px-3 py-1 text-xs"
+            className="absolute right-2 bottom-3 px-3 py-1 text-xs min-h-[44px] sm:min-h-0"
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
           >
