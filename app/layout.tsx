@@ -1,6 +1,7 @@
 import "./globals.css";
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import Link from 'next/link';
+import { ClerkProvider } from '@clerk/nextjs'
+import { Navbar } from "@/components/Navbar";
+import { UserSync } from "@/components/UserSync";
 
 export const metadata = {
   title: "English Mentor AI",
@@ -14,24 +15,13 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body>
-          <nav className="glass-card m-4 p-4 flex justify-between items-center rounded-2xl">
-            <div className="flex gap-6 font-semibold text-lg ml-2">
-              <Link href="/" className="hover:text-purple-400 transition">Grammar Checker</Link>
-              <Link href="/pos" className="hover:text-purple-400 transition">Practice Studio</Link>
-              <Link href="/dashboard" className="hover:text-purple-400 transition">Dashboard</Link>
-            </div>
-            <div className="mr-2">
-              <SignedOut>
-                <SignInButton mode="modal" />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-          </nav>
-          {children}
+      <html lang="en" className="dark">
+        <body className="bg-slate-950 text-slate-100 min-h-screen">
+          <UserSync />
+          <Navbar />
+          <main className="w-full">
+            {children}
+          </main>
         </body>
       </html>
     </ClerkProvider>

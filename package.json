@@ -6,18 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "eval": "tsx scripts/evaluate.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.86",
     "@clerk/nextjs": "^6.0.0",
+    "@clerk/themes": "^2.4.57",
     "@prisma/client": "^5.20.0",
     "ai": "^7.0.87",
     "framer-motion": "^11.5.0",
     "next": "^16.2.10",
     "react": "^19.1.4",
     "react-dom": "^19.1.4",
-    "recharts": "^2.15.4"
+    "recharts": "^2.15.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -30,7 +34,9 @@
     "prisma": "^5.20.0",
     "puppeteer": "^25.12.0",
     "tailwindcss": "^3.4.10",
+    "tsx": "^4.23.15",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.71.0"
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3"
   }
 }

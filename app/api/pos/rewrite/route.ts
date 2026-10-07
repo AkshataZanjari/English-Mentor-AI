@@ -1,29 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
-import {
-  rewriteBodySchema,
-  scenarioReportSchema,
-  scenarioTurnSchema,
-} from "@/lib/pos/schemas";
+import { rewriteBodySchema } from "@/lib/pos/schemas";
 import { buildRewritePrompt } from "@/lib/pos/prompts";
-import { generatePlainText } from "@/lib/pos/model";
+import { generatePlainText, AiTimeoutError } from "@/lib/pos/model";
 import { fail, ok } from "@/lib/pos/response";
-import { safeJsonParse } from "@/lib/pos/parser";
+import { checkRateLimit } from "@/lib/rateLimit";
+import { sanitizeUserText } from "@/lib/pos/sanitize";
 
-function looksLikeScenarioTurnPrompt(text: string) {
-  return (
-    text.includes("assistantReply") &&
-    text.includes("naturalAlternative") &&
-    text.includes("feedback")
-  );
-}
-
-function looksLikeScenarioReportPrompt(text: string) {
-  return (
-    text.includes("mistakesSummary") &&
-    text.includes("betterPhrases") &&
-    text.includes("toneScore")
-  );
-}
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
@@ -32,51 +15,36 @@ export async function POST(req: Request) {
       return fail("Unauthorized", 401);
     }
 
-    const json = await req.json();
-    const body = rewriteBodySchema.parse(json);
-
-    if (looksLikeScenarioTurnPrompt(body.text)) {
-      const raw = await generatePlainText({
-        prompt: body.text,
-      });
-
-      const parsed = safeJsonParse(raw, scenarioTurnSchema);
-
-      if (!parsed.ok) {
-        return fail(`Scenario parser error: ${parsed.error}`, 500);
-      }
-
-      return ok({
-        result: JSON.stringify(parsed.data),
-      });
+    if (!checkRateLimit(userId).success) {
+      return fail("Rate limit exceeded. Please wait a moment.", 429);
     }
 
-    if (looksLikeScenarioReportPrompt(body.text)) {
-      const raw = await generatePlainText({
-        prompt: body.text,
-      });
-
-      const parsed = safeJsonParse(raw, scenarioReportSchema);
-
-      if (!parsed.ok) {
-        return fail(`Scenario report parser error: ${parsed.error}`, 500);
-      }
-
-      return ok({
-        result: JSON.stringify(parsed.data),
-      });
+    let json;
+    try {
+      json = await req.json();
+    } catch {
+      return fail("Invalid JSON", 400);
     }
+
+    const parsed = rewriteBodySchema.safeParse(json);
+    if (!parsed.success) {
+      return fail(parsed.error.issues?.[0]?.message || "Invalid input", 400);
+    }
+
+    const body = parsed.data;
 
     const rewritten = await generatePlainText({
-      prompt: buildRewritePrompt(body.text, body.tone ?? "formal"),
+      prompt: buildRewritePrompt(sanitizeUserText(body.text), body.tone ?? "professional"),
     });
 
     return ok({
       result: rewritten.trim(),
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to rewrite text";
-    return fail(message, 400);
+    console.error("Rewrite API Error:", error);
+    if (error instanceof AiTimeoutError) {
+      return fail("AI response timed out. Please try again.", 504);
+    }
+    return fail("An internal error occurred.", 500);
   }
 }

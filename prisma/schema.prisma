@@ -11,7 +11,8 @@ model User {
   id          String   @id @default(uuid())
   clerkId     String   @unique
   name        String?
-  email       String   @unique
+  email       String?
+  timeZone    String?
   streakCount    Int      @default(0)
   longestStreak  Int      @default(0)
   lastPracticeAt DateTime?

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "**" ]
   pull_request:
     branches: [ "main", "master" ]
 
@@ -28,6 +28,9 @@ jobs:
     - name: Run Lint
       run: npm run lint
       
+    - name: Run Tests
+      run: npm run test
+      
     - name: Run Build
       run: npm run build
       env:
@@ -36,3 +39,7 @@ jobs:
         CLERK_SECRET_KEY: sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX
         DATABASE_URL: postgresql://postgres:password@localhost:5432/db
         GEMINI_API_KEY: dummy_key
+        NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+        NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+        NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /
+        NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: /

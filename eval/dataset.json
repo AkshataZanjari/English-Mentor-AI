@@ -1,0 +1,22 @@
+[
+  { "input": "He go to school every day.", "reference": "He goes to school every day." },
+  { "input": "I has a big house.", "reference": "I have a big house." },
+  { "input": "She don't like apples.", "reference": "She doesn't like apples." },
+  { "input": "They is playing football.", "reference": "They are playing football." },
+  { "input": "We was at the park yesterday.", "reference": "We were at the park yesterday." },
+  { "input": "He didn't went to the store.", "reference": "He didn't go to the store." },
+  { "input": "I have saw that movie.", "reference": "I have seen that movie." },
+  { "input": "She is more taller than me.", "reference": "She is taller than me." },
+  { "input": "My brother have a new car.", "reference": "My brother has a new car." },
+  { "input": "They plays tennis on Sundays.", "reference": "They play tennis on Sundays." },
+  { "input": "I am agree with you.", "reference": "I agree with you." },
+  { "input": "She was born in 1990 at London.", "reference": "She was born in 1990 in London." },
+  { "input": "We will to go to the beach.", "reference": "We will go to the beach." },
+  { "input": "He is a good student, isn't it?", "reference": "He is a good student, isn't he?" },
+  { "input": "I look forward to hear from you.", "reference": "I look forward to hearing from you." },
+  { "input": "She explained me the problem.", "reference": "She explained the problem to me." },
+  { "input": "I want that he comes.", "reference": "I want him to come." },
+  { "input": "They are discussing about the project.", "reference": "They are discussing the project." },
+  { "input": "He is married with a doctor.", "reference": "He is married to a doctor." },
+  { "input": "I need some informations.", "reference": "I need some information." }
+]

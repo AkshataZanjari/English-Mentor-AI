@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
 import GrammarChecker from "@/components/GrammarChecker";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PageContainer } from "@/components/ui/PageContainer";
 
 export default function Home() {
-  useEffect(() => {
-    fetch("/api/auth/sync-user", {
-      method: "POST",
-    }).catch(console.error);
-  }, []);
-
   return (
-    <main className="p-10">
-      <h1 className="text-4xl font-bold text-center mb-8">English Mentor AI</h1>
+    <PageContainer>
+      <PageHeader 
+        title="Check Grammar"
+        description="Instantly correct and improve your sentences."
+      />
       <GrammarChecker />
-    </main>
+    </PageContainer>
   );
 }
