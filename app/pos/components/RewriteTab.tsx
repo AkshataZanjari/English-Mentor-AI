@@ -66,6 +66,8 @@ export function RewriteTab() {
         <div className="space-y-4">
           <div className="relative">
             <Textarea
+              aria-label="Text to rewrite"
+              maxLength={1000}
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Type or speak a sentence to rewrite..."
@@ -80,7 +82,7 @@ export function RewriteTab() {
                   key={t.value}
                   variant={tone === t.value ? "secondary" : "ghost"}
                   onClick={() => setTone(t.value)}
-                  className="flex-1 sm:flex-none text-xs py-1.5 px-3 rounded-md transition-colors"
+                  className="flex-1 sm:flex-none text-xs min-h-[44px] sm:min-h-0 sm:py-1.5 px-3 rounded-md transition-colors"
                 >
                   {t.label}
                 </Button>
@@ -101,7 +103,7 @@ export function RewriteTab() {
               <h3 className="text-sm font-semibold text-slate-400">Rewritten Text:</h3>
               <Button 
                 variant="ghost" 
-                className="text-xs py-1"
+                className="text-xs min-h-[44px] sm:min-h-0 sm:py-1"
                 onClick={() => navigator.clipboard.writeText(result)}
               >
                 Copy

@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import SafeRedirect from "@/components/SafeRedirect";
@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { Badge } from "@/components/ui/Badge";
+import { ensureDbUser } from "@/lib/auth/user";
+import { getActiveStreak } from "@/lib/streak";
 
 export default function DashboardPage() {
   return (
@@ -29,27 +31,15 @@ async function DashboardContent() {
     redirect("/sign-in");
   }
 
-  let dbUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
-
-  if (!dbUser) {
-    const user = await currentUser();
-    if (user) {
-      dbUser = await prisma.user.create({
-        data: {
-          clerkId: userId,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-          email: user.emailAddresses[0]?.emailAddress || "",
-        },
-      });
-    } else {
-      return (
-        <div className="text-center text-red-400 py-10">
-          Error loading user profile. Please try logging out and logging back in.
-        </div>
-      );
-    }
+  let dbUser;
+  try {
+    dbUser = await ensureDbUser(userId);
+  } catch {
+    return (
+      <div className="text-center text-red-400 py-10">
+        Error loading user profile. Please try logging out and logging back in.
+      </div>
+    );
   }
 
   const [totalChecks, avgResult, historyRecords] = await Promise.all([
@@ -66,7 +56,9 @@ async function DashboardContent() {
   ]);
 
   const avgScore = avgResult._avg.score ? Math.round(avgResult._avg.score) : 0;
-  
+
+  const activeStreak = getActiveStreak(dbUser.lastPracticeAt, dbUser.streakCount);
+
   const chartData = historyRecords
     .slice(0, 20)
     .reverse()
@@ -90,7 +82,7 @@ async function DashboardContent() {
         </Card>
         <Card className="text-center py-4 sm:py-6">
           <p className="text-sm font-semibold text-slate-400 mb-1 uppercase tracking-wider">Current Streak</p>
-          <p className="text-4xl font-bold text-orange-400">{dbUser.streakCount} <span className="text-lg text-slate-500">Days</span></p>
+          <p className="text-4xl font-bold text-orange-400">{activeStreak} <span className="text-lg text-slate-500">Days</span></p>
         </Card>
         <Card className="text-center py-4 sm:py-6">
           <p className="text-sm font-semibold text-slate-400 mb-1 uppercase tracking-wider">Total Checks</p>

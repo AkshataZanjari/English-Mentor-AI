@@ -1,12 +1,12 @@
 import React from "react";
 
-interface BadgeProps {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
   variant?: "success" | "error" | "warning" | "neutral" | "primary";
   className?: string;
 }
 
-export function Badge({ children, variant = "neutral", className = "" }: BadgeProps) {
+export function Badge({ children, variant = "neutral", className = "", ...props }: BadgeProps) {
   const variants = {
     success: "bg-green-500/10 text-green-400 border border-green-500/20",
     error: "bg-red-500/10 text-red-400 border border-red-500/20",
@@ -18,6 +18,7 @@ export function Badge({ children, variant = "neutral", className = "" }: BadgePr
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${variants[variant]} ${className}`}
+      {...props}
     >
       {children}
     </span>

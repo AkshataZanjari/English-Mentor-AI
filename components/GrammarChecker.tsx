@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/Card";
@@ -18,6 +18,8 @@ export interface GrammarResult {
   practiceAnswer?: string;
   score?: number;
   scoreExplanation?: string;
+  saved?: boolean;
+  warning?: string;
 }
 
 export default function GrammarChecker() {
@@ -28,6 +30,19 @@ export default function GrammarChecker() {
   const [error, setError] = useState<string | null>(null);
   const { isLoaded, userId } = useAuth();
   const [sessionExpired, setSessionExpired] = useState(false);
+
+  const prevUserId = useRef(userId);
+
+  useEffect(() => {
+    if (userId !== prevUserId.current) {
+      setSentence("");
+      setResult(null);
+      setError(null);
+      setShowDetails(false);
+      setSessionExpired(false);
+      prevUserId.current = userId;
+    }
+  }, [userId]);
 
   async function checkGrammar() {
     if (!sentence.trim()) return;
@@ -40,15 +55,15 @@ export default function GrammarChecker() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sentence }),
       });
-      
+
       const data = await res.json();
-      
+
       if (res.status === 401) {
         setSessionExpired(true);
         setResult(null);
         return;
       }
-      
+
       if (!res.ok) {
         setError(data.error || "An error occurred while checking grammar.");
         setResult(null);
@@ -81,6 +96,7 @@ export default function GrammarChecker() {
       <Card>
         <div className="space-y-4">
           <Textarea
+            aria-label="Sentence to check"
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
             placeholder="Type any English sentence..."
@@ -94,7 +110,7 @@ export default function GrammarChecker() {
             </Button>
           </div>
           {error && (
-            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-red-400 text-sm" role="alert">{error}</p>
           )}
         </div>
       </Card>
@@ -105,12 +121,17 @@ export default function GrammarChecker() {
           animate={{ opacity: 1, y: 0 }}
         >
           <Card className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Badge variant={result.isCorrect ? "success" : "error"} className="text-sm px-3 py-1">
                 {result.isCorrect ? "✓ Correct" : "✗ Needs Work"}
               </Badge>
               {result.score !== undefined && (
                 <Badge variant="neutral">Score: {result.score}/100</Badge>
+              )}
+              {result.warning && (
+                <Badge variant="warning" className="text-xs px-2 py-0.5" title={result.warning}>
+                  ⚠️ Not Saved
+                </Badge>
               )}
             </div>
 
@@ -119,10 +140,11 @@ export default function GrammarChecker() {
               <p className="text-lg font-medium text-slate-100">{result.correctedSentence}</p>
             </div>
 
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-between"
               onClick={() => setShowDetails(!showDetails)}
+              aria-expanded={showDetails}
             >
               {showDetails ? "Hide Details" : "Show Details"}
               <span className="text-xs">{showDetails ? "▲" : "▼"}</span>
@@ -144,19 +166,19 @@ export default function GrammarChecker() {
                       </ul>
                     </div>
                   )}
-                  
+
                   <div>
                     <h4 className="text-sm font-semibold text-slate-400 mb-1">Explanation:</h4>
                     <p className="text-sm text-slate-300">{result.explanation}</p>
                   </div>
-                  
+
                   {result.rule && (
                     <div>
                       <h4 className="text-sm font-semibold text-slate-400 mb-1">Rule:</h4>
                       <p className="text-sm text-slate-300">{result.rule}</p>
                     </div>
                   )}
-                  
+
                   {(result.similarExamples?.length ?? 0) > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-slate-400 mb-1">Examples:</h4>
@@ -165,7 +187,7 @@ export default function GrammarChecker() {
                       </ul>
                     </div>
                   )}
-                  
+
                   {result.practiceQuestion && (
                     <div className="bg-purple-900/20 border border-purple-500/20 p-3 rounded-lg mt-2">
                       <h4 className="text-sm font-semibold text-purple-300 mb-1">Practice:</h4>

@@ -1,5 +1,6 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { ensureDbUser } from "@/lib/auth/user";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generateStructured } from "@/lib/pos/model";
@@ -77,17 +78,12 @@ Important rules:
     });
     const data = rawData as z.infer<typeof grammarCheckResultSchema>;
 
+    let dbUser;
+    let saved = true;
+    let saveWarning;
+
     try {
-      const user = await currentUser();
-      const dbUser = await prisma.user.upsert({
-        where: { clerkId: userId },
-        update: {},
-        create: {
-          clerkId: userId,
-          name: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "",
-          email: user?.emailAddresses[0]?.emailAddress || "",
-        },
-      });
+      dbUser = await ensureDbUser(userId);
 
       await prisma.grammarCheckHistory.create({
         data: {
@@ -118,9 +114,11 @@ Important rules:
       });
     } catch (dbErr) {
       console.error("Database save failed:", dbErr);
+      saved = false;
+      saveWarning = "Grammar check succeeded, but history could not be saved.";
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({ ...data, saved, warning: saveWarning });
   } catch (err: unknown) {
     console.error("Grammar API error:", err);
     return NextResponse.json(

@@ -2,7 +2,7 @@ export function shouldSyncUser(
   isLoaded: boolean,
   isSignedIn: boolean,
   userId: string | null | undefined,
-  hasSynced: boolean
+  syncedUserId: string | null
 ): boolean {
-  return isLoaded && isSignedIn && !!userId && !hasSynced;
+  return isLoaded && isSignedIn && !!userId && userId !== syncedUserId;
 }

@@ -29,9 +29,9 @@ export default function POSPage() {
       </div>
 
       <div className="mt-4">
-        {activeTab === "rewrite" && <RewriteTab />}
-        {activeTab === "reply" && <ReplyTab />}
-        {activeTab === "roleplay" && <RoleplayTab />}
+        <div role="tabpanel" id="panel-rewrite" aria-labelledby="tab-rewrite" className={activeTab === "rewrite" ? "block" : "hidden"}><RewriteTab /></div>
+        <div role="tabpanel" id="panel-reply" aria-labelledby="tab-reply" className={activeTab === "reply" ? "block" : "hidden"}><ReplyTab /></div>
+        <div role="tabpanel" id="panel-roleplay" aria-labelledby="tab-roleplay" className={activeTab === "roleplay" ? "block" : "hidden"}><RoleplayTab /></div>
       </div>
       </div>
     </PageContainer>

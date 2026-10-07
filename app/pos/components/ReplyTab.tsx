@@ -66,6 +66,8 @@ export function ReplyTab() {
             <label className="text-sm font-semibold text-slate-300">Message you received:</label>
             <div className="relative">
               <Textarea
+                aria-label="Message you received"
+                maxLength={1000}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Paste the email or message you received..."
@@ -78,6 +80,8 @@ export function ReplyTab() {
             <label className="text-sm font-semibold text-slate-300">What you want to say (optional rough notes):</label>
             <div className="relative">
               <Textarea
+                aria-label="Your draft reply (optional)"
+                maxLength={1000}
                 value={draftReply}
                 onChange={(e) => setDraftReply(e.target.value)}
                 placeholder="I want to say yes, tomorrow at 10am..."
@@ -101,7 +105,7 @@ export function ReplyTab() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <h3 className="text-sm font-semibold text-purple-400">Improved Reply:</h3>
-                <Button variant="ghost" className="text-xs py-1" onClick={() => navigator.clipboard.writeText(improvedReply)}>Copy</Button>
+                <Button variant="ghost" className="text-xs min-h-[44px] sm:min-h-0 sm:py-1" onClick={() => navigator.clipboard.writeText(improvedReply)}>Copy</Button>
               </div>
               <div className="bg-purple-900/20 border border-purple-500/20 p-4 rounded-xl">
                 <p className="text-slate-100 whitespace-pre-wrap">{improvedReply}</p>

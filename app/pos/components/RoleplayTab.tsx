@@ -130,7 +130,7 @@ export function RoleplayTab() {
               key={sc.id}
               variant={scenarioId === sc.id ? "primary" : "outline"}
               onClick={() => setScenarioId(sc.id)}
-              className="text-xs py-1.5 px-3 shrink-0 whitespace-nowrap snap-start"
+              className="text-xs min-h-[44px] sm:min-h-0 sm:py-1.5 px-3 shrink-0 whitespace-nowrap snap-start"
             >
               {sc.title}
             </Button>
@@ -150,14 +150,14 @@ export function RoleplayTab() {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 scrollbar-none">
-          {messages.map((m) => (
+          {messages.map((m, index) => (
             <div key={m.id} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
               <div className={`max-w-[85%] rounded-2xl p-3 sm:p-4 ${m.role === "user" ? "bg-purple-600 text-white" : "bg-slate-800 text-slate-100"}`}>
                 <p className="whitespace-pre-wrap text-sm sm:text-base">{m.text}</p>
               </div>
               {m.role === "assistant" && m.correction && (
                 <div className="mt-2 ml-2 max-w-[85%] text-xs space-y-1">
-                  {m.correction && m.correction !== messages[messages.length-2]?.text && (
+                  {m.correction && m.correction !== messages[index - 1]?.text && (
                     <p className="text-slate-400">Grammar: <span className="text-slate-200">{m.correction}</span></p>
                   )}
                   {m.naturalAlternative && (
@@ -182,7 +182,7 @@ export function RoleplayTab() {
         {activeScenario.chips.length > 0 && messages[messages.length - 1]?.role === "assistant" && (
           <div className="flex gap-2 overflow-x-auto snap-x scrollbar-none pb-2 mb-2">
             {activeScenario.chips.map((chip, i) => (
-              <Button key={i} variant="outline" className="text-xs py-1 shrink-0 snap-start" onClick={() => sendMessage(chip)}>{chip}</Button>
+              <Button key={i} variant="outline" className="text-xs min-h-[44px] sm:min-h-0 sm:py-1 shrink-0 snap-start" onClick={() => sendMessage(chip)}>{chip}</Button>
             ))}
           </div>
         )}
@@ -190,6 +190,8 @@ export function RoleplayTab() {
         {/* Input Row */}
         <div className="relative pt-2 border-t border-slate-800 mt-auto">
           <Textarea
+            aria-label="Type your reply"
+            maxLength={1000}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your reply..."
