@@ -1,4 +1,4 @@
-import { prisma } from "../prisma";
+import { prisma } from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 
 /**
@@ -40,14 +40,4 @@ export async function ensureDbUser(clerkId: string) {
   });
 
   return dbUser;
-}
-
-export function displayName(user: { name?: string | null; email?: string | null }): string {
-  if (user.name && user.name.trim() !== "") {
-    return user.name;
-  }
-  if (user.email && user.email.includes("@")) {
-    return user.email.split("@")[0];
-  }
-  return "there";
 }

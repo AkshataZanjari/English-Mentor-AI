@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -11,30 +11,57 @@ import { shouldShowCorrection } from "@/lib/pos/roleplay";
 
 export function RoleplayTab() {
   const [scenarioId, setScenarioId] = useState<ScenarioId>("hr-interview");
-  const [messages, setMessages] = useState<ScenarioMessage[]>([]);
+  const { isLoaded, userId } = useAuth();
+
+  if (!isLoaded) return <div className="animate-pulse h-32 bg-slate-800 rounded-xl"></div>;
+  if (!userId) {
+    return (
+      <Card className="text-center py-12">
+        <h2 className="text-xl font-semibold mb-2 text-slate-200">Sign in to use Roleplay AI</h2>
+        <p className="text-slate-400 mb-6">Create an account to practice speaking in realistic scenarios.</p>
+        <SignInButton mode="modal">
+          <Button variant="primary">Sign In</Button>
+        </SignInButton>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex gap-2 overflow-x-auto snap-x scrollbar-none md:flex-wrap pb-2">
+          {scenarioConfigs.map((sc) => (
+            <Button
+              key={sc.id}
+              variant={scenarioId === sc.id ? "primary" : "outline"}
+              onClick={() => setScenarioId(sc.id)}
+              className="text-xs min-h-[44px] sm:min-h-0 sm:py-1.5 px-3 shrink-0 whitespace-nowrap snap-start"
+            >
+              {sc.title}
+            </Button>
+          ))}
+        </div>
+        <p className="text-sm text-slate-400">
+          {scenarioConfigs.find((s) => s.id === scenarioId)?.subtitle}
+        </p>
+      </div>
+      <RoleplayInner key={scenarioId} scenarioId={scenarioId} />
+    </div>
+  );
+}
+
+function RoleplayInner({ scenarioId }: { scenarioId: ScenarioId }) {
+  const activeScenario = scenarioConfigs.find((s) => s.id === scenarioId) || scenarioConfigs[0];
+  const [messages, setMessages] = useState<ScenarioMessage[]>(() => [
+    { id: crypto.randomUUID(), role: "assistant", text: activeScenario.starter }
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<ScenarioReport | null>(null);
-  const { isLoaded, userId } = useAuth();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const activeScenario = scenarioConfigs.find((s) => s.id === scenarioId) || scenarioConfigs[0];
-
-  const startScenario = useCallback(() => {
-    setMessages([{ id: crypto.randomUUID(), role: "assistant", text: activeScenario.starter }]);
-    setInput("");
-    setError(null);
-    setReport(null);
-  }, [activeScenario.starter]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      startScenario();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [scenarioId, startScenario]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -110,39 +137,8 @@ export function RoleplayTab() {
     }
   }
 
-
-
-  if (!isLoaded) return <div className="animate-pulse h-32 bg-slate-800 rounded-xl"></div>;
-  if (!userId) {
-    return (
-      <Card className="text-center py-12">
-        <h2 className="text-xl font-semibold mb-2 text-slate-200">Sign in to use Roleplay AI</h2>
-        <p className="text-slate-400 mb-6">Create an account to practice speaking in realistic scenarios.</p>
-        <SignInButton mode="modal">
-          <Button variant="primary">Sign In</Button>
-        </SignInButton>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <div className="flex gap-2 overflow-x-auto snap-x scrollbar-none md:flex-wrap pb-2">
-          {scenarioConfigs.map((sc) => (
-            <Button
-              key={sc.id}
-              variant={scenarioId === sc.id ? "primary" : "outline"}
-              onClick={() => setScenarioId(sc.id)}
-              className="text-xs min-h-[44px] sm:min-h-0 sm:py-1.5 px-3 shrink-0 whitespace-nowrap snap-start"
-            >
-              {sc.title}
-            </Button>
-          ))}
-        </div>
-        <p className="text-sm text-slate-400">{activeScenario.subtitle}</p>
-      </div>
-
+    <>
       <Card className="flex flex-col h-[70vh] sm:h-[600px]">
         {/* Header Row */}
         <div className="flex justify-between items-center pb-3 mb-3 border-b border-slate-800">
@@ -192,14 +188,14 @@ export function RoleplayTab() {
         )}
 
         {/* Input Row */}
-        <div className="relative pt-2 border-t border-slate-800 mt-auto">
+        <div className="pt-2 border-t border-slate-800 mt-auto">
           <Textarea
             aria-label="Type your reply"
             maxLength={1000}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your reply..."
-            className="pr-12 pb-10 min-h-[4rem]"
+            className="min-h-[4rem]"
             rows={2}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -208,15 +204,21 @@ export function RoleplayTab() {
               }
             }}
           />
-          <MicButton text={input} onTextUpdate={setInput} className="absolute right-2 top-4" />
-          <Button
-            className="absolute right-2 bottom-3 px-3 py-1 text-xs min-h-[44px] sm:min-h-0"
-            onClick={() => sendMessage()}
-            disabled={loading || !input.trim()}
-          >
-            Send
-          </Button>
-          {error && <p className="text-red-400 text-xs mt-1 absolute -bottom-5">{error}</p>}
+          <div className="flex justify-between items-center mt-2">
+            <div className="relative flex-1">
+              {error && <p className="text-red-400 text-xs">{error}</p>}
+            </div>
+            <div className="flex gap-2">
+              <MicButton text={input} onTextUpdate={setInput} />
+              <Button
+                className="px-4 py-2 text-sm min-h-[44px] min-w-[70px] sm:min-h-0 sm:min-w-0"
+                onClick={() => sendMessage()}
+                disabled={loading || !input.trim()}
+              >
+                Send
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -243,6 +245,6 @@ export function RoleplayTab() {
           </div>
         </Card>
       )}
-    </div>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import { Button } from "./Button";
 import { joinTranscriptSegments } from "@/lib/voice";
 
@@ -37,12 +37,15 @@ interface MicButtonProps {
 
 export function MicButton({ text, onTextUpdate, className = "" }: MicButtonProps) {
   const [listening, setListening] = useState(false);
-  const [supported] = useState(() => {
-    if (typeof window === "undefined") return true; // assume true during SSR
-    const win = window as unknown as { SpeechRecognition?: unknown, webkitSpeechRecognition?: unknown };
-    return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
-  });
   const [errorMsg, setErrorMsg] = useState("");
+  const supported = useSyncExternalStore(
+    () => () => {},
+    () => {
+      const win = window as unknown as { SpeechRecognition?: unknown, webkitSpeechRecognition?: unknown };
+      return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
+    },
+    () => true
+  );
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const shouldKeepListeningRef = useRef(false);
   const initialTextRef = useRef("");

@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { Badge } from "@/components/ui/Badge";
-import { ensureDbUser, displayName } from "@/lib/auth/user";
+import { ensureDbUser } from "@/lib/auth/user";
+import { displayName } from "@/lib/auth/displayName";
 import { getActiveStreak } from "@/lib/streak";
 
 export default function DashboardPage() {

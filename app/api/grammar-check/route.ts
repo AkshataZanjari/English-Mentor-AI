@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureDbUser } from "@/lib/auth/user";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { generateStructured } from "@/lib/pos/model";
+import { generateStructured, AiTimeoutError } from "@/lib/pos/model";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { calculateNewStreak, resolveTimeZone } from "@/lib/streak";
 import { sanitizeUserText } from "@/lib/pos/sanitize";
@@ -99,7 +99,7 @@ Important rules:
       });
 
       const now = new Date();
-      const tz = resolveTimeZone(body?.timeZone);
+      const tz = resolveTimeZone(body?.timeZone, dbUser.timeZone || "UTC");
 
       const { newStreak, newLongest } = calculateNewStreak(
         dbUser.lastPracticeAt,
@@ -127,7 +127,7 @@ Important rules:
     return NextResponse.json({ ...data, saved, warning: saveWarning });
   } catch (err: unknown) {
     console.error("Grammar API error:", err);
-    if (err instanceof Error && err.message === "AI response timed out") {
+    if (err instanceof AiTimeoutError) {
       return NextResponse.json(
         { error: "AI response timed out. Please try again." },
         { status: 504 }

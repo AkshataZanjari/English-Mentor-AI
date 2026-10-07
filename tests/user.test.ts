@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { displayName } from "../lib/auth/user";
+import { displayName } from "../lib/auth/displayName";
 
 describe("displayName", () => {
   it("should return name if present", () => {

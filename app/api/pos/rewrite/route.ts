@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { rewriteBodySchema } from "@/lib/pos/schemas";
 import { buildRewritePrompt } from "@/lib/pos/prompts";
-import { generatePlainText } from "@/lib/pos/model";
+import { generatePlainText, AiTimeoutError } from "@/lib/pos/model";
 import { fail, ok } from "@/lib/pos/response";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { sanitizeUserText } from "@/lib/pos/sanitize";
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Rewrite API Error:", error);
-    if (error instanceof Error && error.message === "AI response timed out") {
+    if (error instanceof AiTimeoutError) {
       return fail("AI response timed out. Please try again.", 504);
     }
     return fail("An internal error occurred.", 500);

@@ -8,6 +8,13 @@ const google = createGoogleGenerativeAI({
 
 const model = google("gemini-3.5-flash-lite");
 
+export class AiTimeoutError extends Error {
+  constructor(message = "AI response timed out") {
+    super(message);
+    this.name = "AiTimeoutError";
+  }
+}
+
 export async function generateStructured<T>({
   system,
   prompt,
@@ -20,7 +27,12 @@ export async function generateStructured<T>({
   timeoutMs?: number;
 }) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(new Error("AI response timed out")), timeoutMs);
+  let timedOut = false;
+
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
 
   try {
     const result = await generateObject({
@@ -34,6 +46,11 @@ export async function generateStructured<T>({
     });
 
     return result.object;
+  } catch (err) {
+    if (timedOut) {
+      throw new AiTimeoutError();
+    }
+    throw err;
   } finally {
     clearTimeout(timeoutId);
   }
@@ -49,7 +66,12 @@ export async function generatePlainText({
   timeoutMs?: number;
 }) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(new Error("AI response timed out")), timeoutMs);
+  let timedOut = false;
+
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
 
   try {
     const result = await generateText({
@@ -61,6 +83,11 @@ export async function generatePlainText({
     });
 
     return result.text;
+  } catch (err) {
+    if (timedOut) {
+      throw new AiTimeoutError();
+    }
+    throw err;
   } finally {
     clearTimeout(timeoutId);
   }

@@ -13,13 +13,13 @@ function getStartOfDayInTimeZone(date: Date, timeZone: string): Date {
   return new Date(Date.UTC(year, month, day));
 }
 
-export function resolveTimeZone(tz?: string | null): string {
-  if (!tz) return 'UTC';
+export function resolveTimeZone(tz?: string | null, fallback: string = 'UTC'): string {
+  if (!tz) return fallback;
   try {
     new Intl.DateTimeFormat('en-US', { timeZone: tz });
     return tz;
   } catch {
-    return 'UTC';
+    return fallback;
   }
 }
 

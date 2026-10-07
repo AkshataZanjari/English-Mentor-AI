@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { generatePlainText } from "../lib/pos/model";
+import { generatePlainText, AiTimeoutError } from "../lib/pos/model";
 
 // Mock the AI SDK
 vi.mock("ai", () => ({
@@ -32,6 +32,6 @@ describe("AI Model Generation", () => {
         prompt: "Hello",
         timeoutMs: 50,
       })
-    ).rejects.toThrowError("AI response timed out");
+    ).rejects.toThrowError(AiTimeoutError);
   });
 });

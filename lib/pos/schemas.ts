@@ -6,9 +6,6 @@ export const rewriteBodySchema = z.object({
   tone: z.enum(["casual", "professional"]).optional(),
 });
 
-export const checkBodySchema = z.object({
-  text: z.string().min(1, "Text is required").max(1000, "Text is too long"),
-});
 
 export const replyBodySchema = z.object({
   message: z.string().min(1, "Message is required").max(1000, "Message is too long"),
@@ -40,10 +37,6 @@ export const scenarioReportSchema = z.object({
   overallFeedback: z.string().default(""),
 });
 
-export const checkResultSchema = z.object({
-  result: z.string().min(1),
-  details: z.array(z.string()).default([]),
-});
 
 export const replyResultSchema = z.object({
   suggestions: z.array(z.string()).min(0).max(2).default([]),

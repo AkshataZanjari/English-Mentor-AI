@@ -4,7 +4,7 @@ import { buildScenarioTurnPrompt, buildScenarioReportPrompt } from "@/lib/pos/sc
 import { checkRateLimit } from "@/lib/rateLimit";
 import { sanitizeUserText } from "@/lib/pos/sanitize";
 import { ok, fail } from "@/lib/pos/response";
-import { generatePlainText } from "@/lib/pos/model";
+import { generatePlainText, AiTimeoutError } from "@/lib/pos/model";
 import { safeJsonParse } from "@/lib/pos/parser";
 
 export const maxDuration = 30;
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
   } catch (err: unknown) {
     console.error("Roleplay API Error:", err);
-    if (err instanceof Error && err.message === "AI response timed out") {
+    if (err instanceof AiTimeoutError) {
       return fail("AI response timed out. Please try again.", 504);
     }
     return fail("An internal error occurred.", 500);

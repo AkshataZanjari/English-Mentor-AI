@@ -63,10 +63,16 @@ describe("resolveTimeZone", () => {
     expect(resolveTimeZone("America/New_York")).toBe("America/New_York");
   });
 
-  it("should fallback to UTC for invalid timezones", () => {
+  it("should fallback to default (UTC) if no fallback is provided for invalid timezones", () => {
     expect(resolveTimeZone("Invalid/Zone")).toBe("UTC");
     expect(resolveTimeZone("")).toBe("UTC");
     expect(resolveTimeZone(undefined)).toBe("UTC");
+  });
+
+  it("should use provided fallback for invalid timezones", () => {
+    expect(resolveTimeZone("Invalid/Zone", "America/Los_Angeles")).toBe("America/Los_Angeles");
+    expect(resolveTimeZone("", "Asia/Tokyo")).toBe("Asia/Tokyo");
+    expect(resolveTimeZone(undefined, "Europe/London")).toBe("Europe/London");
   });
 
   it("should handle IST same-day correctly", () => {
