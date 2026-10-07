@@ -123,25 +123,37 @@ export function RoleplayTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        {scenarioConfigs.map((sc) => (
-          <Button
-            key={sc.id}
-            variant={scenarioId === sc.id ? "primary" : "outline"}
-            onClick={() => setScenarioId(sc.id)}
-            className="text-xs py-1.5 px-3 whitespace-nowrap"
-          >
-            {sc.title}
-          </Button>
-        ))}
+      <div className="space-y-2">
+        <div className="flex gap-2 overflow-x-auto snap-x scrollbar-none md:flex-wrap pb-2">
+          {scenarioConfigs.map((sc) => (
+            <Button
+              key={sc.id}
+              variant={scenarioId === sc.id ? "primary" : "outline"}
+              onClick={() => setScenarioId(sc.id)}
+              className="text-xs py-1.5 px-3 shrink-0 whitespace-nowrap snap-start"
+            >
+              {sc.title}
+            </Button>
+          ))}
+        </div>
+        <p className="text-sm text-slate-400">{activeScenario.subtitle}</p>
       </div>
 
-      <Card className="flex flex-col h-[500px]">
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
+      <Card className="flex flex-col h-[70vh] sm:h-[600px]">
+        {/* Header Row */}
+        <div className="flex justify-between items-center pb-3 mb-3 border-b border-slate-800">
+          <h3 className="font-semibold text-slate-200">{activeScenario.title}</h3>
+          <Button variant="secondary" className="px-3 py-1.5 text-xs" onClick={generateReport} disabled={reportLoading || messages.length < 2}>
+            {reportLoading ? "Analyzing..." : "End & Grade"}
+          </Button>
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 scrollbar-none">
           {messages.map((m) => (
             <div key={m.id} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
-              <div className={`max-w-[85%] rounded-2xl p-4 ${m.role === "user" ? "bg-purple-600 text-white" : "bg-slate-800 text-slate-100"}`}>
-                <p className="whitespace-pre-wrap">{m.text}</p>
+              <div className={`max-w-[85%] rounded-2xl p-3 sm:p-4 ${m.role === "user" ? "bg-purple-600 text-white" : "bg-slate-800 text-slate-100"}`}>
+                <p className="whitespace-pre-wrap text-sm sm:text-base">{m.text}</p>
               </div>
               {m.role === "assistant" && m.correction && (
                 <div className="mt-2 ml-2 max-w-[85%] text-xs space-y-1">
@@ -160,44 +172,45 @@ export function RoleplayTab() {
           ))}
           {loading && (
             <div className="flex items-start">
-              <div className="bg-slate-800 text-slate-400 rounded-2xl p-4 max-w-[85%]">Typing...</div>
+              <div className="bg-slate-800 text-slate-400 rounded-2xl p-3 max-w-[85%] text-sm">Typing...</div>
             </div>
           )}
           <div ref={chatEndRef} />
         </div>
 
-        <div className="space-y-3 pt-4 border-t border-slate-800">
-          {activeScenario.chips.length > 0 && messages[messages.length - 1]?.role === "assistant" && (
-            <div className="flex flex-wrap gap-2">
-              {activeScenario.chips.map((chip, i) => (
-                <Button key={i} variant="outline" className="text-xs py-1" onClick={() => sendMessage(chip)}>{chip}</Button>
-              ))}
-            </div>
-          )}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Textarea 
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your reply..."
-                className="pr-12"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-              />
-                <MicButton text={input} onTextUpdate={setInput} className="absolute right-2 top-2" />
-            </div>
-            <div className="flex flex-col justify-between gap-2">
-              <Button onClick={() => sendMessage()} disabled={loading || !input.trim()}>Send</Button>
-              <Button variant="secondary" onClick={generateReport} disabled={reportLoading || messages.length < 2}>
-                {reportLoading ? "Analyzing..." : "End & Grade"}
-              </Button>
-            </div>
+        {/* Suggestions Row */}
+        {activeScenario.chips.length > 0 && messages[messages.length - 1]?.role === "assistant" && (
+          <div className="flex gap-2 overflow-x-auto snap-x scrollbar-none pb-2 mb-2">
+            {activeScenario.chips.map((chip, i) => (
+              <Button key={i} variant="outline" className="text-xs py-1 shrink-0 snap-start" onClick={() => sendMessage(chip)}>{chip}</Button>
+            ))}
           </div>
-          {error && <p className="text-red-400 text-xs">{error}</p>}
+        )}
+
+        {/* Input Row */}
+        <div className="relative pt-2 border-t border-slate-800 mt-auto">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your reply..."
+            className="pr-12 pb-10 min-h-[4rem]"
+            rows={2}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+          />
+          <MicButton text={input} onTextUpdate={setInput} className="absolute right-2 top-4" />
+          <Button
+            className="absolute right-2 bottom-3 px-3 py-1 text-xs"
+            onClick={() => sendMessage()}
+            disabled={loading || !input.trim()}
+          >
+            Send
+          </Button>
+          {error && <p className="text-red-400 text-xs mt-1 absolute -bottom-5">{error}</p>}
         </div>
       </Card>
 

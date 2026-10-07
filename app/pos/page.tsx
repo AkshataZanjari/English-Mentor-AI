@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PageContainer } from "@/components/ui/PageContainer";
 import { Tabs } from "@/components/ui/Tabs";
 import { RewriteTab } from "./components/RewriteTab";
 import { ReplyTab } from "./components/ReplyTab";
@@ -16,8 +17,9 @@ export default function POSPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
+    <PageContainer>
+      <div className="space-y-6">
+        <PageHeader
         title="Practice Studio" 
         description="Improve your English in real-world scenarios."
       />
@@ -31,6 +33,7 @@ export default function POSPage() {
         {activeTab === "reply" && <ReplyTab />}
         {activeTab === "roleplay" && <RoleplayTab />}
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

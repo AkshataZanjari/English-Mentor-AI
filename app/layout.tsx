@@ -1,6 +1,7 @@
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs'
 import { Navbar } from "@/components/Navbar";
+import { UserSync } from "@/components/UserSync";
 
 export const metadata = {
   title: "English Mentor AI",
@@ -16,8 +17,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className="dark">
         <body className="bg-slate-950 text-slate-100 min-h-screen">
+          <UserSync />
           <Navbar />
-          <main className="max-w-3xl mx-auto px-4 py-10">
+          <main className="w-full">
             {children}
           </main>
         </body>

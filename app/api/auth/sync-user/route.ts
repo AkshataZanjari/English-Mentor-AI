@@ -14,18 +14,23 @@ export async function POST() {
 
   const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
 
-  await prisma.user.upsert({
-    where: { clerkId: userId },
-    update: {
-      name,
-      email,
-    },
-    create: {
-      clerkId: userId,
-      name,
-      email,
-    },
-  });
+  try {
+    await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {
+        name,
+        email,
+      },
+      create: {
+        clerkId: userId,
+        name,
+        email,
+      },
+    });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Sync user error:", err);
+    return NextResponse.json({ error: "Failed to sync user" }, { status: 500 });
+  }
 }

@@ -13,6 +13,7 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.86",
     "@clerk/nextjs": "^6.0.0",
+    "@clerk/themes": "^2.4.57",
     "@prisma/client": "^5.20.0",
     "ai": "^7.0.87",
     "framer-motion": "^11.5.0",

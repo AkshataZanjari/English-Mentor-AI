@@ -1,10 +1,12 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 import SafeRedirect from "@/components/SafeRedirect";
 import { prisma } from "@/lib/prisma";
 import ProgressChart from "@/components/ProgressChart";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PageContainer } from "@/components/ui/PageContainer";
 import { Badge } from "@/components/ui/Badge";
 
 export default function DashboardPage() {
@@ -24,12 +26,7 @@ async function DashboardContent() {
   const { userId } = await auth();
 
   if (!userId) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <h2 className="text-2xl font-bold">Syncing Session...</h2>
-      </div>
-    );
+    redirect("/sign-in");
   }
 
   let dbUser = await prisma.user.findUnique({
@@ -79,29 +76,30 @@ async function DashboardContent() {
     }));
 
   return (
-    <div className="space-y-8">
-      <PageHeader 
+    <PageContainer>
+      <div className="space-y-6 sm:space-y-8">
+        <PageHeader
         title={`Welcome back, ${dbUser.name}`}
         description="Track your English learning progress over time."
       />
 
-      <div className="grid grid-cols-3 gap-6">
-        <Card className="text-center py-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="text-center py-4 sm:py-6">
           <p className="text-sm font-semibold text-slate-400 mb-1 uppercase tracking-wider">Avg Score</p>
           <p className="text-4xl font-bold text-purple-400">{avgScore}</p>
         </Card>
-        <Card className="text-center py-6">
+        <Card className="text-center py-4 sm:py-6">
           <p className="text-sm font-semibold text-slate-400 mb-1 uppercase tracking-wider">Current Streak</p>
           <p className="text-4xl font-bold text-orange-400">{dbUser.streakCount} <span className="text-lg text-slate-500">Days</span></p>
         </Card>
-        <Card className="text-center py-6">
+        <Card className="text-center py-4 sm:py-6">
           <p className="text-sm font-semibold text-slate-400 mb-1 uppercase tracking-wider">Total Checks</p>
           <p className="text-4xl font-bold text-emerald-400">{totalChecks}</p>
         </Card>
       </div>
 
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Grammar Score Trend</h2>
+      <Card>
+        <h2 className="text-xl font-semibold mb-4 sm:mb-6">Grammar Score Trend</h2>
         {chartData.length > 0 ? (
           <div className="h-[300px] w-full">
             <ProgressChart data={chartData} />
@@ -113,18 +111,18 @@ async function DashboardContent() {
         )}
       </Card>
 
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Recent History</h2>
+      <Card>
+        <h2 className="text-xl font-semibold mb-4 sm:mb-6">Recent History</h2>
         <div className="space-y-3">
           {historyRecords.slice(0, 10).map((h) => (
-            <div key={h.id} className="bg-slate-950/50 p-4 rounded-xl flex items-center justify-between border border-slate-800">
-              <div className="truncate pr-4">
-                <p className="font-medium text-slate-200 truncate">{h.originalText}</p>
+            <div key={h.id} className="bg-slate-950/50 p-3 sm:p-4 rounded-xl flex items-center justify-between border border-slate-800 gap-2">
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="font-medium text-slate-200 break-words">{h.originalText}</p>
                 <p className="text-xs text-slate-500 mt-1">
                   {new Date(h.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <Badge variant={(h.score || 0) >= 80 ? "success" : (h.score || 0) >= 60 ? "warning" : "error"}>
+              <Badge variant={(h.score || 0) >= 80 ? "success" : (h.score || 0) >= 60 ? "warning" : "error"} className="shrink-0">
                 Score: {h.score || 0}
               </Badge>
             </div>
@@ -136,6 +134,7 @@ async function DashboardContent() {
           )}
         </div>
       </Card>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

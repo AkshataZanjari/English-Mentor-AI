@@ -73,20 +73,20 @@ export function RewriteTab() {
             />
               <MicButton text={text} onTextUpdate={setText} className="absolute right-2 top-2" />
           </div>
-          <div className="flex flex-wrap gap-2 items-center justify-between">
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <div className="flex w-full sm:w-auto bg-slate-950 p-1 rounded-lg border border-slate-800">
               {tones.map((t) => (
                 <Button
                   key={t.value}
-                  variant={tone === t.value ? "primary" : "ghost"}
+                  variant={tone === t.value ? "secondary" : "ghost"}
                   onClick={() => setTone(t.value)}
-                  className="text-xs py-1.5 px-3"
+                  className="flex-1 sm:flex-none text-xs py-1.5 px-3 rounded-md transition-colors"
                 >
                   {t.label}
                 </Button>
               ))}
             </div>
-            <Button onClick={rewriteTone} disabled={loading || !text.trim()}>
+            <Button onClick={rewriteTone} disabled={loading || !text.trim()} className="w-full sm:w-auto">
               {loading ? "Rewriting..." : "Rewrite"}
             </Button>
           </div>

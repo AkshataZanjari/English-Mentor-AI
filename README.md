@@ -61,7 +61,13 @@ The application uses Prisma with PostgreSQL and stores:
 - **User:** Tracks user profiles, longest streaks, current streaks, and the date of their last practice (`lastPracticeAt`).
 - **GrammarCheckHistory:** Logs every practice submission, the original text, corrected text, the resulting AI score (0-100), detailed feedback, and timestamps.
 
-## 8. Local setup
+## 7. Authentication
+This project uses Clerk for authentication.
+- **Sign In/Up:** Available via the navigation bar modal, or dedicated `/sign-in` and `/sign-up` pages.
+- **Protected Routes:** `/dashboard` and `/api/dashboard` require authentication. Unauthenticated users are redirected.
+- **AI Routes:** All AI feature routes require a valid session to ensure usage tracking and prevent abuse.
+
+## 8. Database
 
 To run the project locally, clone the repository and install the dependencies:
 
@@ -98,6 +104,10 @@ GEMINI_API_KEY=your_gemini_api_key_here
 DATABASE_URL=your_postgres_connection_string_here
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 ```
 
 ## 10. Project structure

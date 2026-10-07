@@ -87,7 +87,7 @@ export function ReplyTab() {
             </div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={generateReplies} disabled={loading || !message.trim()}>
+            <Button onClick={generateReplies} disabled={loading || !message.trim()} className="w-full sm:w-auto">
               {loading ? "Generating..." : "Generate Replies"}
             </Button>
           </div>

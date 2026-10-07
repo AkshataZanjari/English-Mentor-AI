@@ -84,12 +84,12 @@ export default function GrammarChecker() {
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
             placeholder="Type any English sentence..."
-            className="h-32"
+            className="h-24 sm:h-32 min-h-[6rem]"
             maxLength={1000}
           />
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-500">{sentence.length}/1000</span>
-            <Button onClick={checkGrammar} disabled={loading || !sentence.trim()}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <span className="text-xs text-slate-500 w-full sm:w-auto text-right sm:text-left">{sentence.length}/1000</span>
+            <Button onClick={checkGrammar} disabled={loading || !sentence.trim()} className="w-full sm:w-auto disabled:opacity-70 disabled:text-slate-300">
               {loading ? "Checking..." : "Check Grammar"}
             </Button>
           </div>
